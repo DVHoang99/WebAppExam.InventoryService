@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="WebAppExam.InventoryService.API/WebAppExam.InventoryService.API.csproj" />
+  <Project Path="WebAppExam.InventoryService.Application/WebAppExam.InventoryService.Application.csproj" />
+  <Project Path="WebAppExam.InventoryService.Domain/WebAppExam.InventoryService.Domain.csproj" />
+  <Project Path="WebAppExam.InventoryService.Infrastructure/WebAppExam.InventoryService.Infrastructure.csproj" />
+</Solution>

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "LH17YViNyCA=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\hoangdv\\.nuget\\packages\\ulid\\1.4.1\\ulid.1.4.1.nupkg.sha512"
+  ],
+  "logs": []
+}

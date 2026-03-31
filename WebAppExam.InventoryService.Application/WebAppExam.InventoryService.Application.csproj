@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebAppExam.InventoryService.Domain\WebAppExam.InventoryService.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Inventories\Commands\" />
+    <Folder Include="Inventories\Queries\" />
+    <Folder Include="WareHouse\" />
+    <Folder Include="WareHouse\Commands\" />
+    <Folder Include="WareHouse\DTOs\" />
+    <Folder Include="WareHouse\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.1.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

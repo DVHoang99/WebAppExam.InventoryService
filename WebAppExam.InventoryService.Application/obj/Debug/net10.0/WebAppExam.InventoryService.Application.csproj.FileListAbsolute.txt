@@ -1,0 +1,15 @@
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\bin\Debug\net10.0\WebAppExam.InventoryService.Application.deps.json
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\bin\Debug\net10.0\WebAppExam.InventoryService.Application.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\bin\Debug\net10.0\WebAppExam.InventoryService.Application.pdb
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\bin\Debug\net10.0\WebAppExam.InventoryService.Domain.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\bin\Debug\net10.0\WebAppExam.InventoryService.Domain.pdb
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppExam.InventoryService.Application.csproj.AssemblyReference.cache
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppExam.InventoryService.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppExam.InventoryService.Application.AssemblyInfoInputs.cache
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppExam.InventoryService.Application.AssemblyInfo.cs
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppExam.InventoryService.Application.csproj.CoreCompileInputs.cache
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppEx.4DE526CD.Up2Date
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppExam.InventoryService.Application.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\refint\WebAppExam.InventoryService.Application.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\WebAppExam.InventoryService.Application.pdb
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Application\obj\Debug\net10.0\ref\WebAppExam.InventoryService.Application.dll
