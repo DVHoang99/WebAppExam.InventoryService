@@ -5,14 +5,20 @@
   </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="KafkaFlow" Version="4.2.0" />
+		<PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="4.2.0" />
+		<PackageReference Include="KafkaFlow.Serializer.Json" Version="1.5.8" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
 		<PackageReference Include="MongoDB.Driver" Version="3.7.1" />
+		<PackageReference Include="StackExchange.Redis" Version="2.12.8" />
 		<PackageReference Include="Ulid" Version="1.4.1" />
 	</ItemGroup>
 
   <ItemGroup>
     <Folder Include="Persistence\" />
     <Folder Include="Repositories\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,8 +1,42 @@
+
 using MongoDB.Driver;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Infrastructure.Repositories;
+using KafkaFlow;
+using KafkaFlow.Serializer;
+using WebAppExam.InventoryService.Infrastructure.Consumers;
+using WebAppExam.InventoryService.Infrastructure.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+var kafkaBrokers = builder.Configuration.GetSection("KafkaConfig:Brokers").Get<string[]>()
+                   ?? new[] { "localhost:9092" };
+
+builder.Services.AddKafka(kafka => kafka
+    .UseConsoleLog()
+    .AddCluster(cluster => cluster
+        .WithBrokers(kafkaBrokers)
+        .AddProducer(
+            "order-reply",
+            producer => producer
+                .DefaultTopic("order-reply-topic")
+                .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
+        )
+
+        .AddConsumer(consumer => consumer
+            .Topic("order-created-topic")
+            .WithGroupId("inventory-consumer-group")
+            .WithWorkersCount(5)
+            .WithBufferSize(100)
+            .AddMiddlewares(middlewares => middlewares
+            .AddSingleTypeDeserializer<OrderCreatedEvent, JsonCoreDeserializer>()
+            .AddTypedHandlers(h => h
+            .WithHandlerLifetime(InstanceLifetime.Scoped)
+            .AddHandler<OrderCreatedConsumer>())
+)
+        )
+    )
+);
 
 builder.Services.AddControllers();
 // 1. Lấy cấu hình từ appsettings
@@ -25,9 +59,21 @@ builder.Services.AddMediatR(cfg =>
     var assemblies = AppDomain.CurrentDomain.GetAssemblies();
     cfg.RegisterServicesFromAssemblies(assemblies);
 });
+var redisConfig = builder.Configuration.GetSection("Redis")["Configuration"] ?? "localhost:6379";
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(redisConfig)
+);
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConfig;
+});
+
 builder.Services.AddScoped<IWareHouseRepository, WareHouseRepository>();
 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<ICacheLockService, CacheLockService>();
 
 
 var app = builder.Build();
@@ -40,6 +86,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+var kafkaBus = app.Services.CreateKafkaBus();
+await kafkaBus.StartAsync();
 
 app.MapControllers();
 

@@ -11,4 +11,9 @@ public class WareHouseRepository : BaseRepository<WareHouse>, IWareHouseReposito
         : base(database, "WareHouses")
     {
     }
+    public async Task<List<WareHouse>> GetByIdsAync(List<string> ids, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<WareHouse>.Filter.In(x => x.Id, ids);
+        return await _collection.Find(filter).ToListAsync(cancellationToken);
+    }
 }

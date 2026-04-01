@@ -20,7 +20,6 @@ public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuer
 
         return new InventoryDTO
         {
-            Id = res.Id,
             ProductId = res.ProductId,
             StockQuantity = res.StockQuantity,
         };

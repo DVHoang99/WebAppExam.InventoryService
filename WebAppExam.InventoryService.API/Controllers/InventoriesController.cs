@@ -1,8 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using WebAppExam.InventoryService.Application.Inventories.Commands;
+using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Application.Inventories.Queries;
+using WebAppExam.InventoryService.Application.WareHouse.DTOs;
 
 namespace WebAppExam.InventoryService.API.Controllers
 {
@@ -18,48 +21,42 @@ namespace WebAppExam.InventoryService.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateInventoryCommand command)
+        public async Task<IActionResult> Create(InventoryDTO input)
         {
-            // Send command to MediatR
-            var id = await _mediator.Send(command);
-            return Ok(new { Id = id });
+            var command = new CreateInventoryCommand(input);
+            var result = await _mediator.Send(command);
+            return Ok(new { data = result });
+        }
+
+        [HttpPost("batch")]
+        public async Task<IActionResult> GetByCorrelationIds([FromBody] GetBatchInventoryRequest request)
+        {
+            var query = new GetByCorrelationIdsQuery(request);
+            var inventories = await _mediator.Send(query);
+            return Ok(new { data = inventories });
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
-            // Send query to MediatR
             var result = await _mediator.Send(new GetInventoryByIdQuery(id));
             return result != null ? Ok(result) : NotFound();
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateInventoryCommand command)
+        public async Task<IActionResult> Update(string id, [FromBody] InventoryRequestDTO request)
         {
-            // Ensure the ID in the URL matches the ID in the request body
-            if (id != command.Id)
-            {
-                return BadRequest("The ID in the URL does not match the ID in the request body.");
-            }
+            var command = new UpdateInventoryCommand(id, request.WareHouseId, request.Stock, request.UpdateEventId);
 
-            // Send command to MediatR to handle update
             var result = await _mediator.Send(command);
 
-            // Return 404 if inventory doesn't exist, otherwise return 204 No Content
-            if (!result)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
+            return Ok(new { data = result });
         }
 
-        // DELETE: DELETE api/inventories/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id, [FromBody] InventoryRequestDTO request)
         {
-            // Prepare and send the delete command
-            var command = new DeleteInventoryCommand(id);
+            var command = new DeleteInventoryCommand(id, request.WareHouseId);
             var result = await _mediator.Send(command);
 
             if (!result)

@@ -751,6 +751,22 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "dependencies": {
+            "KafkaFlow": {
+              "target": "Package",
+              "version": "[4.2.0, )"
+            },
+            "KafkaFlow.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[4.2.0, )"
+            },
+            "KafkaFlow.Serializer.Json": {
+              "target": "Package",
+              "version": "[1.5.8, )"
+            },
+            "Microsoft.Extensions.Caching.StackExchangeRedis": {
+              "target": "Package",
+              "version": "[10.0.5, )"
+            },
             "Microsoft.Extensions.Options.ConfigurationExtensions": {
               "target": "Package",
               "version": "[10.0.0, )"
@@ -758,6 +774,10 @@
             "MongoDB.Driver": {
               "target": "Package",
               "version": "[3.7.1, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.12.8, )"
             },
             "Ulid": {
               "target": "Package",

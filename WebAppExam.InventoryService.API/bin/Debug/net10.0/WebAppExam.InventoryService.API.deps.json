@@ -8,6 +8,11 @@
     ".NETCoreApp,Version=v10.0": {
       "WebAppExam.InventoryService.API/1.0.0": {
         "dependencies": {
+          "KafkaFlow": "4.2.0",
+          "KafkaFlow.LogHandler.Console": "4.2.0",
+          "KafkaFlow.Microsoft.DependencyInjection": "4.2.0",
+          "KafkaFlow.Serializer.Json": "1.5.8",
+          "KafkaFlow.Serializer.JsonCore": "4.2.0",
           "MediatR": "14.1.0",
           "Microsoft.AspNetCore.OpenApi": "10.0.5",
           "WebAppExam.InventoryService.Application": "1.0.0",
@@ -17,11 +22,213 @@
           "WebAppExam.InventoryService.API.dll": {}
         }
       },
+      "Confluent.Kafka/2.8.0": {
+        "dependencies": {
+          "librdkafka.redist": "2.8.0"
+        },
+        "runtime": {
+          "lib/net8.0/Confluent.Kafka.dll": {
+            "assemblyVersion": "2.8.0.0",
+            "fileVersion": "2.8.0.0"
+          }
+        }
+      },
       "DnsClient/1.6.1": {
         "runtime": {
           "lib/net5.0/DnsClient.dll": {
             "assemblyVersion": "1.6.1.0",
             "fileVersion": "1.6.1.0"
+          }
+        }
+      },
+      "KafkaFlow/4.2.0": {
+        "dependencies": {
+          "Confluent.Kafka": "2.8.0",
+          "KafkaFlow.Abstractions": "4.2.0",
+          "Microsoft.Bcl.AsyncInterfaces": "9.0.3",
+          "Microsoft.IO.RecyclableMemoryStream": "3.0.1"
+        },
+        "runtime": {
+          "lib/netstandard2.0/KafkaFlow.dll": {
+            "assemblyVersion": "4.2.0.0",
+            "fileVersion": "4.2.0.0"
+          }
+        }
+      },
+      "KafkaFlow.Abstractions/4.2.0": {
+        "runtime": {
+          "lib/netstandard2.0/KafkaFlow.Abstractions.dll": {
+            "assemblyVersion": "4.2.0.0",
+            "fileVersion": "4.2.0.0"
+          }
+        }
+      },
+      "KafkaFlow.LogHandler.Console/4.2.0": {
+        "dependencies": {
+          "KafkaFlow.Abstractions": "4.2.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/KafkaFlow.LogHandler.Console.dll": {
+            "assemblyVersion": "4.2.0.0",
+            "fileVersion": "4.2.0.0"
+          }
+        }
+      },
+      "KafkaFlow.Microsoft.DependencyInjection/4.2.0": {
+        "dependencies": {
+          "KafkaFlow": "4.2.0",
+          "KafkaFlow.Abstractions": "4.2.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/KafkaFlow.Microsoft.DependencyInjection.dll": {
+            "assemblyVersion": "4.2.0.0",
+            "fileVersion": "4.2.0.0"
+          }
+        }
+      },
+      "KafkaFlow.Serializer.Json/1.5.8": {
+        "dependencies": {
+          "KafkaFlow.Abstractions": "4.2.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/KafkaFlow.Serializer.Json.dll": {
+            "assemblyVersion": "1.5.8.0",
+            "fileVersion": "1.5.8.0"
+          }
+        }
+      },
+      "KafkaFlow.Serializer.JsonCore/4.2.0": {
+        "dependencies": {
+          "KafkaFlow.Abstractions": "4.2.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/KafkaFlow.Serializer.JsonCore.dll": {
+            "assemblyVersion": "4.2.0.0",
+            "fileVersion": "4.2.0.0"
+          }
+        }
+      },
+      "librdkafka.redist/2.8.0": {
+        "runtimeTargets": {
+          "runtimes/linux-arm64/native/librdkafka.so": {
+            "rid": "linux-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/alpine-librdkafka.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/centos8-librdkafka.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/librdkafka.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx-arm64/native/librdkafka.dylib": {
+            "rid": "osx-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx-x64/native/librdkafka.dylib": {
+            "rid": "osx-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libcrypto-3-x64.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "3.3.2.0"
+          },
+          "runtimes/win-x64/native/libcurl.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "8.10.1.0"
+          },
+          "runtimes/win-x64/native/librdkafka.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/librdkafkacpp.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libssl-3-x64.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "3.3.2.0"
+          },
+          "runtimes/win-x64/native/msvcp140.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "14.40.33816.0"
+          },
+          "runtimes/win-x64/native/vcruntime140.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "14.40.33816.0"
+          },
+          "runtimes/win-x64/native/zlib1.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "1.3.1.0"
+          },
+          "runtimes/win-x64/native/zstd.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "1.5.6.0"
+          },
+          "runtimes/win-x86/native/libcrypto-3.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "3.3.2.0"
+          },
+          "runtimes/win-x86/native/libcurl.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "8.10.1.0"
+          },
+          "runtimes/win-x86/native/librdkafka.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/librdkafkacpp.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libssl-3.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "3.3.2.0"
+          },
+          "runtimes/win-x86/native/msvcp140.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "14.40.33816.0"
+          },
+          "runtimes/win-x86/native/vcruntime140.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "14.40.33816.0"
+          },
+          "runtimes/win-x86/native/zlib1.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "1.3.1.0"
+          },
+          "runtimes/win-x86/native/zstd.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "1.5.6.0"
           }
         }
       },
@@ -51,6 +258,25 @@
         },
         "runtime": {
           "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
+          }
+        }
+      },
+      "Microsoft.Bcl.AsyncInterfaces/9.0.3": {
+        "runtime": {
+          "lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll": {
+            "assemblyVersion": "9.0.0.3",
+            "fileVersion": "9.0.325.11113"
+          }
+        }
+      },
+      "Microsoft.Extensions.Caching.StackExchangeRedis/10.0.5": {
+        "dependencies": {
+          "StackExchange.Redis": "2.12.8"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.Extensions.Caching.StackExchangeRedis.dll": {
             "assemblyVersion": "10.0.5.0",
             "fileVersion": "10.0.526.15411"
           }
@@ -97,6 +323,14 @@
           }
         }
       },
+      "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
+        "runtime": {
+          "lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll": {
+            "assemblyVersion": "3.0.1.0",
+            "fileVersion": "3.0.1.0"
+          }
+        }
+      },
       "Microsoft.OpenApi/2.0.0": {
         "runtime": {
           "lib/net8.0/Microsoft.OpenApi.dll": {
@@ -128,6 +362,14 @@
           }
         }
       },
+      "Pipelines.Sockets.Unofficial/2.2.8": {
+        "runtime": {
+          "lib/net5.0/Pipelines.Sockets.Unofficial.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "2.2.8.1080"
+          }
+        }
+      },
       "SharpCompress/0.30.1": {
         "runtime": {
           "lib/net5.0/SharpCompress.dll": {
@@ -141,6 +383,26 @@
           "lib/net5.0/Snappier.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "StackExchange.Redis/2.12.8": {
+        "dependencies": {
+          "Pipelines.Sockets.Unofficial": "2.2.8",
+          "System.IO.Hashing": "10.0.2"
+        },
+        "runtime": {
+          "lib/net10.0/StackExchange.Redis.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.12.8.35577"
+          }
+        }
+      },
+      "System.IO.Hashing/10.0.2": {
+        "runtime": {
+          "lib/net10.0/System.IO.Hashing.dll": {
+            "assemblyVersion": "10.0.0.2",
+            "fileVersion": "10.0.225.61305"
           }
         }
       },
@@ -185,7 +447,12 @@
       },
       "WebAppExam.InventoryService.Infrastructure/1.0.0": {
         "dependencies": {
+          "KafkaFlow": "4.2.0",
+          "KafkaFlow.Microsoft.DependencyInjection": "4.2.0",
+          "KafkaFlow.Serializer.Json": "1.5.8",
+          "Microsoft.Extensions.Caching.StackExchangeRedis": "10.0.5",
           "MongoDB.Driver": "3.7.1",
+          "StackExchange.Redis": "2.12.8",
           "Ulid": "1.4.1",
           "WebAppExam.InventoryService.Application": "1.0.0"
         },
@@ -204,12 +471,68 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Confluent.Kafka/2.8.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-i5Qb5BPthGXmLRSZWXVLPVNfo9Mxt+UieC+E/ZTFmlGIuPPd57g7Sxp8QP7fYp7qEBXs561jvWDLGaCZqV9ycg==",
+      "path": "confluent.kafka/2.8.0",
+      "hashPath": "confluent.kafka.2.8.0.nupkg.sha512"
+    },
     "DnsClient/1.6.1": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-4H/f2uYJOZ+YObZjpY9ABrKZI+JNw3uizp6oMzTXwDw6F+2qIPhpRl/1t68O/6e98+vqNiYGu+lswmwdYUy3gg==",
       "path": "dnsclient/1.6.1",
       "hashPath": "dnsclient.1.6.1.nupkg.sha512"
+    },
+    "KafkaFlow/4.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-4LxAIwKwCqIthofZpf0x/CtWqpfDQDYphC+Ug+HDozfgaedb6+LZKNzNaH8dUJLBEUTQKPrsWY5xnq0ZcJmmqA==",
+      "path": "kafkaflow/4.2.0",
+      "hashPath": "kafkaflow.4.2.0.nupkg.sha512"
+    },
+    "KafkaFlow.Abstractions/4.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NIuC/kO0dZPz2DPbnU1hrmPufi8oCOE+YNdEoUc+2rqcgFr8BDBpBkxkZ3dHp0TLeyVoHUL0PDMBXfxamugwbg==",
+      "path": "kafkaflow.abstractions/4.2.0",
+      "hashPath": "kafkaflow.abstractions.4.2.0.nupkg.sha512"
+    },
+    "KafkaFlow.LogHandler.Console/4.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3dQ7hIXCmGr5S163oscgrIfTezs5nMQ6lwlKoggiF637HVy9skfCFOcrU5fgDDlwSu0XoPEl6L8sb5C8VB9xRQ==",
+      "path": "kafkaflow.loghandler.console/4.2.0",
+      "hashPath": "kafkaflow.loghandler.console.4.2.0.nupkg.sha512"
+    },
+    "KafkaFlow.Microsoft.DependencyInjection/4.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-fZZld1xnEzu8E9OaZ2CDNhfOq3Hd3cs8ZvXjOkApRThyFTfzqYDeiN09fOOuWWEZr07THEc9ey7plgUhqmex7A==",
+      "path": "kafkaflow.microsoft.dependencyinjection/4.2.0",
+      "hashPath": "kafkaflow.microsoft.dependencyinjection.4.2.0.nupkg.sha512"
+    },
+    "KafkaFlow.Serializer.Json/1.5.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ug7sNphG6T6/N6960OMtdK6smk5P8GyT/FGp2XTgilhtbPVTJ+i0+WHLvX/eZmcjM1Xiq4XzZXVrUE1bptqoZw==",
+      "path": "kafkaflow.serializer.json/1.5.8",
+      "hashPath": "kafkaflow.serializer.json.1.5.8.nupkg.sha512"
+    },
+    "KafkaFlow.Serializer.JsonCore/4.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-stWCFD4UsN7wC8NKUw9qCcgNiQdlSwXSvqcUrNgYukBKUEnYE7U/tQKn0UjGbyROLILAbJC68oz6+L2n7jUGbQ==",
+      "path": "kafkaflow.serializer.jsoncore/4.2.0",
+      "hashPath": "kafkaflow.serializer.jsoncore.4.2.0.nupkg.sha512"
+    },
+    "librdkafka.redist/2.8.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Gg8nPjn9+Sp6X+O1g9duKarCteFQjpkCVJS06ihVQf4PVnR/jPXkN3vwvWe5zP4L47xiEfU+6wIp4pbIvaQ6rQ==",
+      "path": "librdkafka.redist/2.8.0",
+      "hashPath": "librdkafka.redist.2.8.0.nupkg.sha512"
     },
     "MediatR/14.1.0": {
       "type": "package",
@@ -231,6 +554,20 @@
       "sha512": "sha512-vTcxIfOPyfFbYk1g8YcXJfkMnlEWVkSnnjxcZLy60zgwiHMRf2SnZR+9E4HlpwKxgE3yfKMOti8J6WfKuKsw6w==",
       "path": "microsoft.aspnetcore.openapi/10.0.5",
       "hashPath": "microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512"
+    },
+    "Microsoft.Bcl.AsyncInterfaces/9.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-oFFX9Ls8dnNUBCD9yzRzHTY8tqvv+CiX43B8L8DjrM8BqYTAlORYaJf6+KXNtSC2bD1135yV8OxzcZFaluow5w==",
+      "path": "microsoft.bcl.asyncinterfaces/9.0.3",
+      "hashPath": "microsoft.bcl.asyncinterfaces.9.0.3.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Caching.StackExchangeRedis/10.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zXb143/TpEKOLQuWGw2CkJgb9F4XXh2XbevMvppzsIHr1/pjML0zjc+vzXcpCV8YUwpW5NIaScZhzFSm621B3Q==",
+      "path": "microsoft.extensions.caching.stackexchangeredis/10.0.5",
+      "hashPath": "microsoft.extensions.caching.stackexchangeredis.10.0.5.nupkg.sha512"
     },
     "Microsoft.IdentityModel.Abstractions/8.14.0": {
       "type": "package",
@@ -260,6 +597,13 @@
       "path": "microsoft.identitymodel.tokens/8.14.0",
       "hashPath": "microsoft.identitymodel.tokens.8.14.0.nupkg.sha512"
     },
+    "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-s/s20YTVY9r9TPfTrN5g8zPF1YhwxyqO6PxUkrYTGI2B+OGPe9AdajWZrLhFqXIvqIW23fnUE4+ztrUWNU1+9g==",
+      "path": "microsoft.io.recyclablememorystream/3.0.1",
+      "hashPath": "microsoft.io.recyclablememorystream.3.0.1.nupkg.sha512"
+    },
     "Microsoft.OpenApi/2.0.0": {
       "type": "package",
       "serviceable": true,
@@ -281,6 +625,13 @@
       "path": "mongodb.driver/3.7.1",
       "hashPath": "mongodb.driver.3.7.1.nupkg.sha512"
     },
+    "Pipelines.Sockets.Unofficial/2.2.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zG2FApP5zxSx6OcdJQLbZDk2AVlN2BNQD6MorwIfV6gVj0RRxWPEp2LXAxqDGZqeNV1Zp0BNPcNaey/GXmTdvQ==",
+      "path": "pipelines.sockets.unofficial/2.2.8",
+      "hashPath": "pipelines.sockets.unofficial.2.2.8.nupkg.sha512"
+    },
     "SharpCompress/0.30.1": {
       "type": "package",
       "serviceable": true,
@@ -294,6 +645,20 @@
       "sha512": "sha512-rFtK2KEI9hIe8gtx3a0YDXdHOpedIf9wYCEYtBEmtlyiWVX3XlCNV03JrmmAi/Cdfn7dxK+k0sjjcLv4fpHnqA==",
       "path": "snappier/1.0.0",
       "hashPath": "snappier.1.0.0.nupkg.sha512"
+    },
+    "StackExchange.Redis/2.12.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-I2x/MZ+I0YR2KYYOtlIaEq0Thd+Uhioao6BIaEs+U1MeGkbJF+peLtoZucJwHmfrFxMDXAzWOZrLnOQqPgyGvA==",
+      "path": "stackexchange.redis/2.12.8",
+      "hashPath": "stackexchange.redis.2.12.8.nupkg.sha512"
+    },
+    "System.IO.Hashing/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AKJknIFi9O3+rGExxTry188JPvUoZAPcCtS2qdqyFhIzsxQ1Ap94BeGDG0VzVEHakhmRxmJtVih6TsHoghIt/g==",
+      "path": "system.io.hashing/10.0.2",
+      "hashPath": "system.io.hashing.10.0.2.nupkg.sha512"
     },
     "Ulid/1.4.1": {
       "type": "package",

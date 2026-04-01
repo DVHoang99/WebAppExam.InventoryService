@@ -15,18 +15,28 @@ public class UpdateInventoryCommandHandler : IRequestHandler<UpdateInventoryComm
 
     public async Task<bool> Handle(UpdateInventoryCommand request, CancellationToken cancellationToken)
     {
-        // 1. Get the existing entity
-        var inventory = await _repository.GetByIdAsync(request.Id, cancellationToken);
-        
+        var inventory = await _repository.GetInventoryByProductIdAndWarehouseIdAsync(
+        request.Id,
+        request.WareHouseId,
+        cancellationToken);
+
         if (inventory == null)
         {
             throw new Exception("Inventory not found");
         }
 
-        // 2. Execute domain logic to update state
-        inventory.UpdateStock(request.NewStockQuantity);
+        if (inventory.ProcessedUpdateIds != null &&
+            inventory.ProcessedUpdateIds.Contains(request.UpdateEventId))
+        {
+            return true;
+        }
 
-        // 3. Save the updated entity
+        inventory.OverrideStock(request.NewStockQuantity);
+        inventory.CreatedAt = DateTime.UtcNow;
+
+        inventory.ProcessedUpdateIds ??= new List<string>();
+        inventory.ProcessedUpdateIds.Add(request.UpdateEventId);
+
         await _repository.UpdateAsync(inventory, cancellationToken);
 
         return true;

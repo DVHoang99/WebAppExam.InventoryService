@@ -15,3 +15,4 @@ C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventorySe
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Infrastructure\obj\Debug\net10.0\refint\WebAppExam.InventoryService.Infrastructure.dll
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Infrastructure\obj\Debug\net10.0\WebAppExam.InventoryService.Infrastructure.pdb
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Infrastructure\obj\Debug\net10.0\ref\WebAppExam.InventoryService.Infrastructure.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Infrastructure\obj\Debug\net10.0\WebAppExam.InventoryService.Infrastructure.sourcelink.json

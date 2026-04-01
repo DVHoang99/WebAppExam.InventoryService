@@ -10,3 +10,4 @@ C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventorySe
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Domain\obj\Debug\net10.0\refint\WebAppExam.InventoryService.Domain.dll
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Domain\obj\Debug\net10.0\WebAppExam.InventoryService.Domain.pdb
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Domain\obj\Debug\net10.0\ref\WebAppExam.InventoryService.Domain.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.Domain\obj\Debug\net10.0\WebAppExam.InventoryService.Domain.sourcelink.json

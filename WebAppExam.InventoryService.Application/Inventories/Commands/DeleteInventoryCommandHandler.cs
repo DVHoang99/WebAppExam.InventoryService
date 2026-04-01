@@ -15,14 +15,14 @@ public class DeleteInventoryCommandHandler : IRequestHandler<DeleteInventoryComm
 
     public async Task<bool> Handle(DeleteInventoryCommand request, CancellationToken cancellationToken)
     {
-        var inventory = await _repository.GetByIdAsync(request.Id, cancellationToken);
-        
+        var inventory = await _repository.GetInventoryByProductIdAndWarehouseIdAsync(request.Id, request.WareHouseId, cancellationToken);
+
         if (inventory == null)
         {
-            return false; 
+            return false;
         }
 
-        await _repository.DeleteAsync(request.Id, cancellationToken);
+        await _repository.DeleteAsync(inventory.Id, cancellationToken);
 
         return true;
     }
