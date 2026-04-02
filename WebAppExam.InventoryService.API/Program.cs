@@ -7,6 +7,7 @@ using KafkaFlow.Serializer;
 using WebAppExam.InventoryService.Infrastructure.Consumers;
 using WebAppExam.InventoryService.Infrastructure.Services;
 using StackExchange.Redis;
+using WebAppExam.InventoryService.Infrastructure.Consumers.OrderUpdatedConsumer;
 
 var builder = WebApplication.CreateBuilder(args);
 var kafkaBrokers = builder.Configuration.GetSection("KafkaConfig:Brokers").Get<string[]>()
@@ -22,6 +23,12 @@ builder.Services.AddKafka(kafka => kafka
                 .DefaultTopic("order-reply-topic")
                 .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
         )
+        .AddProducer(
+            "order-updated-reply",
+            producer => producer
+                .DefaultTopic("order-updated-reply-topic")
+                .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
+        )
 
         .AddConsumer(consumer => consumer
             .Topic("order-created-topic")
@@ -33,8 +40,22 @@ builder.Services.AddKafka(kafka => kafka
             .AddTypedHandlers(h => h
             .WithHandlerLifetime(InstanceLifetime.Scoped)
             .AddHandler<OrderCreatedConsumer>())
-)
+            )
         )
+
+        .AddConsumer(consumer => consumer
+            .Topic("order-updated-topic")
+            .WithGroupId("inventory-consumer-group")
+            .WithWorkersCount(5)
+            .WithBufferSize(100)
+            .AddMiddlewares(middlewares => middlewares
+            .AddSingleTypeDeserializer<OrderUpdatedEvent, JsonCoreDeserializer>()
+            .AddTypedHandlers(h => h
+            .WithHandlerLifetime(InstanceLifetime.Scoped)
+            .AddHandler<OrderUpdatedConsumer>())
+            )
+        )
+
     )
 );
 
