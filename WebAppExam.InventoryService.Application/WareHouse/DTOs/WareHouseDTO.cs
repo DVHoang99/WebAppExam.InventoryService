@@ -5,7 +5,7 @@ namespace WebAppExam.InventoryService.Application.WareHouse.DTOs;
 
 public class WareHouseDTO
 {
-    public string Id { get; set; }
+    public string? Id { get; set; }
     public string Address { get; set; }
     public string OwnerName { get; set; }
     public string OwnerEmail { get; set; }

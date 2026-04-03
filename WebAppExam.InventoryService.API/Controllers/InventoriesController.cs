@@ -54,17 +54,11 @@ namespace WebAppExam.InventoryService.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id, [FromBody] InventoryRequestDTO request)
+        public async Task<IActionResult> Delete(string id, [FromQuery] string wareHouseId)
         {
-            var command = new DeleteInventoryCommand(id, request.WareHouseId);
+            var command = new DeleteInventoryCommand(id, wareHouseId);
             var result = await _mediator.Send(command);
-
-            if (!result)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
+            return Ok(new { data = result });
         }
     }
 }
