@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer;
 
 var builder = WebApplication.CreateBuilder(args);
 var kafkaBrokers = builder.Configuration.GetSection("KafkaConfig:Brokers").Get<string[]>()
@@ -35,6 +36,13 @@ builder.Services.AddKafka(kafka => kafka
             "order-updated-reply",
             producer => producer
                 .DefaultTopic("order-updated-reply-topic")
+                .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
+        )
+
+        .AddProducer(
+            "order-canceled-reply",
+            producer => producer
+                .DefaultTopic("order-canceled-reply-topic")
                 .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
         )
 
@@ -77,6 +85,18 @@ builder.Services.AddKafka(kafka => kafka
             )
         )
 
+        .AddConsumer(consumer => consumer
+            .Topic("order-canceled-topic")
+            .WithGroupId("inventory-order-canceled-group")
+            .WithWorkersCount(2)
+            .WithBufferSize(100)
+            .AddMiddlewares(middlewares => middlewares
+            .AddSingleTypeDeserializer<OrderCanceledEvent, JsonCoreDeserializer>()
+            .AddTypedHandlers(h => h
+            .WithHandlerLifetime(InstanceLifetime.Scoped)
+            .AddHandler<OrderCanceledConsumer>())
+            )
+        )
     )
 );
 
@@ -159,6 +179,8 @@ builder.Services.AddScoped<IWareHouseRepository, WareHouseRepository>();
 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ICacheLockService, CacheLockService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+
 
 
 var app = builder.Build();

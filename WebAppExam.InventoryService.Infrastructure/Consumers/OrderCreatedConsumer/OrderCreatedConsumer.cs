@@ -1,22 +1,21 @@
-using System;
 using KafkaFlow;
 using KafkaFlow.Producers;
-using StackExchange.Redis;
 using WebAppExam.InventoryService.Application.Interfaces;
+using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Domain.Enum;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers;
 
 public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
 {
-    private readonly IInventoryRepository _inventoryRepo;
+    private readonly IInventoryService _inventoryService;
     private readonly IProducerAccessor _producerAccessor;
 
     public OrderCreatedConsumer(
-        IInventoryRepository inventoryRepo,
+        IInventoryService inventoryService,
         IProducerAccessor producerAccessor)
     {
-        _inventoryRepo = inventoryRepo;
+        _inventoryService = inventoryService;
         _producerAccessor = producerAccessor;
     }
 
@@ -27,34 +26,35 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
 
         try
         {
-            foreach (var item in message.Items)
+            if (message.Items != null && message.Items.Any())
             {
-                var stock = await _inventoryRepo.GetStockAsync(Ulid.Parse(item.ProductId), Ulid.Parse(item.WareHouseId));
-                if (stock < item.Quantity)
-                {
-                    isSuccess = false;
-                    failReason = $"Sản phẩm {item.ProductId} không đủ số lượng.";
-                    break; 
-                }
-            }
+                var requiredStocks = message.Items
+                    .GroupBy(x => new { ProductId = Ulid.Parse(x.ProductId), WarehouseId = Ulid.Parse(x.WareHouseId) })
+                    .Select(g => new
+                    {
+                        g.Key.ProductId,
+                        g.Key.WarehouseId,
+                        TotalRequired = g.Sum(x => x.Quantity),
+                        RawProductIdStr = g.First().ProductId
+                    })
+                    .ToList();
 
-            if (isSuccess)
-            {
-                foreach (var item in message.Items)
+                var input = message.Items.Select(x => new OrderItemDTO
                 {
-                    await _inventoryRepo.DeductStockAsync(
-                        Ulid.Parse(item.ProductId),
-                        Ulid.Parse(item.WareHouseId),
-                        item.Quantity);
-                }
+                    ProductId = x.ProductId,
+                    Quantity = x.Quantity,
+                    WareHouseId = x.WareHouseId
+                }).ToList();
+
+                (bool IsSuccess, string FailReason) stockDict = await _inventoryService.CheckAndDeductInventoryAsync(input);
+                var orderReplyProducer = _producerAccessor.GetProducer("order-reply");
+                await orderReplyProducer.ProduceAsync(message.OrderId, new
+                {
+                    OrderId = message.OrderId,
+                    Status = isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
+                    Reason = failReason
+                });
             }
-            var orderReplyProducer = _producerAccessor.GetProducer("order-reply");
-            await orderReplyProducer.ProduceAsync(message.OrderId, new
-            {
-                OrderId = message.OrderId,
-                Status = isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
-                Reason = failReason
-            });
         }
         catch (Exception ex)
         {

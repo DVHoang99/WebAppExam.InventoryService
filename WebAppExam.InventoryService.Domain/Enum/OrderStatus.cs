@@ -7,5 +7,6 @@ public enum OrderStatus
     Pending = 2,
     WaitingForPayment = 3,
     Paid = 4,
-    Failed = 5
+    Failed = 5,
+    Updating = 6
 }

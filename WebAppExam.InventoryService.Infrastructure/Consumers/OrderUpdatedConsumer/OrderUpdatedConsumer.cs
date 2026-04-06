@@ -4,6 +4,7 @@ using KafkaFlow.Producers;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using WebAppExam.InventoryService.Application.Interfaces;
+using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Domain.Enum;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderUpdatedConsumer;
@@ -23,41 +24,26 @@ public class OrderUpdatedConsumer : IMessageHandler<OrderUpdatedEvent>
 
     public async Task Handle(IMessageContext context, OrderUpdatedEvent message)
     {
-        bool isSuccess = true;
-        string failReason = string.Empty;
         try
         {
             using var scope = _serviceProvider.CreateScope();
-            var inventoryRepo = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
+            var inventoryRepo = scope.ServiceProvider.GetRequiredService<IInventoryService>();
 
-            foreach (var item in message.Items)
+            var input = message.Items.Select(x => new OrderItemDTO
             {
-                var stock = await inventoryRepo.GetStockAsync(Ulid.Parse(item.ProductId), Ulid.Parse(item.WareHouseId));
-                if (stock < item.Quantity)
-                {
-                    isSuccess = false;
-                    failReason = $"Sản phẩm {item.ProductId} không đủ số lượng.";
-                    break;
-                }
-            }
+                ProductId = x.ProductId,
+                Quantity = x.Quantity,
+                WareHouseId = x.WareHouseId
+            }).ToList();
 
-            if (isSuccess)
-            {
-                foreach (var item in message.Items)
-                {
-                    await inventoryRepo.DeductStockAsync(
-                        Ulid.Parse(item.ProductId),
-                        Ulid.Parse(item.WareHouseId),
-                        item.Quantity);
-                }
-            }
+            (bool IsSuccess, string FailReason) stockDict = await inventoryRepo.CheckAndDeductInventoryAsync(input);
 
-            await SendMessageReply(message, isSuccess, failReason);
+            await SendMessageReply(message, stockDict.IsSuccess, stockDict.FailReason);
         }
         catch (Exception ex)
         {
-            var reason = "Lỗi hệ thống nội bộ Inventory";
-            await SendMessageReply(message, isSuccess, reason);
+            var reason = "Inventory service internal error";
+            await SendMessageReply(message, false, reason);
             Console.WriteLine($"[Error] - Inventory Handler: {ex.Message}");
         }
     }
@@ -68,7 +54,7 @@ public class OrderUpdatedConsumer : IMessageHandler<OrderUpdatedEvent>
         await orderReplyProducer.ProduceAsync(message.OrderId, new
         {
             OrderId = message.OrderId,
-            Status = isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
+            Status = isSuccess ? message.Status : OrderStatus.Failed,
             Reason = reason,
             Data = message.Items.Select(item => new
             {

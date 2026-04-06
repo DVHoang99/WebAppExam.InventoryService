@@ -7,7 +7,6 @@ namespace WebAppExam.InventoryService.Infrastructure.Repositories;
 
 public class InventoryRepository : BaseRepository<Inventory>, IInventoryRepository
 {
-    // Pass the MongoDB database and the specific collection name to the base class
     public InventoryRepository(IMongoDatabase database)
         : base(database, "Inventories")
     {
@@ -62,5 +61,48 @@ public class InventoryRepository : BaseRepository<Inventory>, IInventoryReposito
         var result = await _collection.UpdateOneAsync(filter, update);
 
         return result.ModifiedCount > 0;
+    }
+
+    public async Task<List<Inventory>> GetInventoriesByIdsAsync(List<string> ids, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Inventory>.Filter.In(x => x.Id, ids);
+        return await _collection.Find(filter).ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<(Ulid ProductId, Ulid WarehouseId), int>> GetStocksBulkAsync(List<(Ulid ProductId, Ulid WarehouseId)> keys, CancellationToken cancellationToken = default)
+    {
+        if (keys == null || !keys.Any())
+        {
+            return new Dictionary<(Ulid, Ulid), int>();
+        }
+
+        var filterBuilder = Builders<Inventory>.Filter;
+        var filters = new List<FilterDefinition<Inventory>>();
+
+        foreach (var key in keys)
+        {
+            var condition = filterBuilder.And(
+                filterBuilder.Eq(x => x.ProductId, key.ProductId.ToString()),
+                filterBuilder.Eq(x => x.WareHouseId, key.WarehouseId.ToString())
+            );
+            filters.Add(condition);
+        }
+
+        var finalFilter = filterBuilder.Or(filters);
+
+        var projection = Builders<Inventory>.Projection
+            .Include(x => x.ProductId)
+            .Include(x => x.WareHouseId)
+            .Include(x => x.StockQuantity); 
+
+        var inventories = await _collection
+            .Find(finalFilter)
+            .Project<Inventory>(projection) 
+            .ToListAsync(cancellationToken);
+
+        return inventories.ToDictionary(
+            x => (Ulid.Parse(x.ProductId), Ulid.Parse(x.WareHouseId)),
+            x => x.StockQuantity
+        );
     }
 }
