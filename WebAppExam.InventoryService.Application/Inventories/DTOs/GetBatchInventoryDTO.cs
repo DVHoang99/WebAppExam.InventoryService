@@ -5,9 +5,23 @@ namespace WebAppExam.InventoryService.Application.Inventories.DTOs;
 
 public class GetBatchInventoryDTO
 {
-    public string ProductId { get; set; }
-    public int StockQuantity { get; set; }
-    public string CorrelationId { get; set; }
-    public string WareHouseId { get; set; }
-    public WareHouseDTO WareHouse { get; set; }
+    public string ProductId { get; init; }
+    public int StockQuantity { get; init; }
+    public string CorrelationId { get; init; }
+    public string WareHouseId { get; init; }
+    public WareHouseDTO? WareHouse { get; init; }
+
+    private GetBatchInventoryDTO(string productId, int stockQuantity, string correlationId, string wareHouseId, WareHouseDTO? wareHouse)
+    {
+        ProductId = productId;
+        StockQuantity = stockQuantity;
+        CorrelationId = correlationId;
+        WareHouseId = wareHouseId;
+        WareHouse = wareHouse;
+    }
+
+    public static GetBatchInventoryDTO Init(string productId, int stockQuantity, string correlationId, string wareHouseId, WareHouseDTO? wareHouse)
+    {
+        return new GetBatchInventoryDTO(productId, stockQuantity, correlationId, wareHouseId, wareHouse);
+    }
 }

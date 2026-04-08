@@ -7,4 +7,9 @@ namespace WebAppExam.InventoryService.Application.WareHouse.Queries;
 public class GetWareHouseByIdQuery(string id) : IRequest<WareHouseDTO>
 {
     public string Id { get; set; } = id;
+
+    public static GetWareHouseByIdQuery Init(string id)
+    {
+        return new GetWareHouseByIdQuery(id);
+    }
 }

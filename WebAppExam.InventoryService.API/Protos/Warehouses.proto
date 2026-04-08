@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "WebAppExam.InventoryService.API.Protos";
+service WarehouseGrpc {
+  rpc GetWarehouse (GetWarehouseRequest) returns (GetWarehouseResponse);
+}
+
+message GetWarehouseRequest {
+  string id = 1;
+}
+
+message GetWarehouseResponse {
+  string id = 1;
+  string address = 2;
+  string owner_name = 3;
+  string owner_email = 4;
+  string owner_phone = 5;
+}

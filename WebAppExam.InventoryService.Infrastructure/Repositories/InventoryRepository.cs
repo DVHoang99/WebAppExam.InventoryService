@@ -93,16 +93,23 @@ public class InventoryRepository : BaseRepository<Inventory>, IInventoryReposito
         var projection = Builders<Inventory>.Projection
             .Include(x => x.ProductId)
             .Include(x => x.WareHouseId)
-            .Include(x => x.StockQuantity); 
+            .Include(x => x.StockQuantity);
 
         var inventories = await _collection
             .Find(finalFilter)
-            .Project<Inventory>(projection) 
+            .Project<Inventory>(projection)
             .ToListAsync(cancellationToken);
 
         return inventories.ToDictionary(
             x => (Ulid.Parse(x.ProductId), Ulid.Parse(x.WareHouseId)),
             x => x.StockQuantity
         );
+    }
+
+    public async Task<List<Inventory>> GetByProductIdsAsync(List<string> productIds, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Inventory>.Filter.In(x => x.ProductId, productIds);
+        var inventories = await _collection.Find(filter).ToListAsync(cancellationToken);
+        return inventories;
     }
 }

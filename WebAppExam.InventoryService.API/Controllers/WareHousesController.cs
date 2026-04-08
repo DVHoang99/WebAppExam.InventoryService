@@ -40,3 +40,4 @@ namespace WebAppExam.InventoryService.API.Controllers
         }
     }
 }
+

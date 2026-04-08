@@ -9,5 +9,6 @@ namespace WebAppExam.InventoryService.Application.Interfaces
     public interface IInventoryService
     {
         Task<(bool IsSuccess, string FailReason)> CheckAndDeductInventoryAsync(IEnumerable<OrderItemDTO> items);
+        Task<List<GetBatchInventoryDTO>> GetBatchInventoryDTOsByIdsAnsyc(List<string> ids, CancellationToken cancellationToken);
     }
 }

@@ -12,9 +12,11 @@ using WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsumer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer;
+using WebAppExam.InventoryService.API.Common;
+using WebAppExam.InventoryService.API.Services;
+using WebAppExam.InventoryService.API.Services.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 var kafkaBrokers = builder.Configuration.GetSection("KafkaConfig:Brokers").Get<string[]>()
@@ -46,31 +48,53 @@ builder.Services.AddKafka(kafka => kafka
                 .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
         )
 
-        .AddConsumer(consumer => consumer
-            .Topic("order-created-topic")
-            .WithGroupId("inventory-order-created-group")
-            .WithWorkersCount(2)
-            .WithBufferSize(100)
-            .AddMiddlewares(middlewares => middlewares
-            .AddSingleTypeDeserializer<OrderCreatedEvent, JsonCoreDeserializer>()
-            .AddTypedHandlers(h => h
-            .WithHandlerLifetime(InstanceLifetime.Scoped)
-            .AddHandler<OrderCreatedConsumer>())
-            )
-        )
+// .AddConsumer(consumer => consumer
+//     .Topic("order-created-topic")
+//     .WithGroupId("inventory-order-created-group")
+//     .WithWorkersCount(2)
+//     .WithBufferSize(100)
+//     .AddMiddlewares(middlewares => middlewares
+//     .AddSingleTypeDeserializer<OrderCreatedEvent, JsonCoreDeserializer>()
+//     .AddTypedHandlers(h => h
+//     .WithHandlerLifetime(InstanceLifetime.Scoped)
+//     .AddHandler<OrderCreatedConsumer>())
+//     )
+// )
 
-        .AddConsumer(consumer => consumer
-            .Topic("order-updated-topic")
-            .WithGroupId("inventory-order-updated-group")
-            .WithWorkersCount(2)
-            .WithBufferSize(100)
-            .AddMiddlewares(middlewares => middlewares
-            .AddSingleTypeDeserializer<OrderUpdatedEvent, JsonCoreDeserializer>()
-            .AddTypedHandlers(h => h
+
+.AddConsumer(consumer => consumer
+    .Topic("order-topic1")
+    .WithGroupId("inventory-order-group")
+    .WithWorkersCount(2)
+    .WithBufferSize(100)
+    .AddMiddlewares(middlewares => middlewares
+
+        // Pass the MessageTypeResolver as the second generic parameter
+        // This completely bypasses the IDependencyResolver compiler error
+        .AddDeserializer<JsonCoreDeserializer, MessageTypeResolver>()
+
+        // Register the handlers for each event type
+        // KafkaFlow will automatically route the message to the correct handler 
+        .AddTypedHandlers(h => h
             .WithHandlerLifetime(InstanceLifetime.Scoped)
-            .AddHandler<OrderUpdatedConsumer>())
-            )
+            .AddHandler<OrderCreatedConsumer>()
+            .AddHandler<OrderUpdatedConsumer>()
         )
+    )
+)
+
+        // .AddConsumer(consumer => consumer
+        //     .Topic("order-updated-topic")
+        //     .WithGroupId("inventory-order-updated-group")
+        //     .WithWorkersCount(2)
+        //     .WithBufferSize(100)
+        //     .AddMiddlewares(middlewares => middlewares
+        //     .AddSingleTypeDeserializer<OrderUpdatedEvent, JsonCoreDeserializer>()
+        //     .AddTypedHandlers(h => h
+        //     .WithHandlerLifetime(InstanceLifetime.Scoped)
+        //     .AddHandler<OrderUpdatedConsumer>())
+        //     )
+        // )
 
         .AddConsumer(consumer => consumer
             .Topic("order-deleted-topic")
@@ -181,9 +205,13 @@ builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ICacheLockService, CacheLockService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 
-
+builder.Services.AddGrpc();
+builder.Services.AddGrpcReflection();
 
 var app = builder.Build();
+
+app.MapGrpcService<InventoryGrpcService>();
+app.MapGrpcService<WarehouseGrpcService>();
 
 if (app.Environment.IsDevelopment())
 {

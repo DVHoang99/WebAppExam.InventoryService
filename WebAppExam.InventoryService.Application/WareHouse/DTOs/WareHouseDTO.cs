@@ -11,19 +11,17 @@ public class WareHouseDTO
     public string OwnerEmail { get; set; }
     public string OwnerPhone { get; set; }
 
-    public static WareHouseDTO FromResult(Domain.Entity.WareHouse wareHouse)
+    private WareHouseDTO(string id, string address, string ownerName, string ownerEmail, string ownerPhone)
     {
-        if (wareHouse == null)
-            return null;
-
-        return new WareHouseDTO
-        {
-            Id = wareHouse.Id,
-            Address = wareHouse.Address,
-            OwnerName = wareHouse.OwnerName,
-            OwnerEmail = wareHouse.OwnerEmail,
-            OwnerPhone = wareHouse.OwnerPhone,
-        };
+        Id = id;
+        Address = address;
+        OwnerName = ownerName;
+        OwnerEmail = ownerEmail;
+        OwnerPhone = ownerPhone;
     }
 
+    public static WareHouseDTO FromResult(Domain.Entity.WareHouse wareHouse)
+    {
+        return new WareHouseDTO(wareHouse.Id, wareHouse.Address, wareHouse.OwnerName, wareHouse.OwnerEmail, wareHouse.OwnerPhone);
+    }
 }

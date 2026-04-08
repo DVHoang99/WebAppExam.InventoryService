@@ -14,4 +14,5 @@ public interface IInventoryRepository : IBaseRepository<Inventory>
     Task<bool> DeductStockAsync(Ulid productId, Ulid warehouseId, int quantity, CancellationToken cancellationToken = default);
     Task<List<Inventory>> GetInventoriesByIdsAsync(List<string> ids, CancellationToken cancellationToken = default);
     Task<Dictionary<(Ulid ProductId, Ulid WarehouseId), int>> GetStocksBulkAsync(List<(Ulid ProductId, Ulid WarehouseId)> keys, CancellationToken cancellationToken = default);
+    Task<List<Inventory>> GetByProductIdsAsync(List<string> productIds, CancellationToken cancellationToken = default);
 }

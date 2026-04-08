@@ -37,22 +37,9 @@ public class GetByCorrelationIdsQueryHandler : IRequestHandler<GetByCorrelationI
         {
             var wareHouse = wareHouseMap.GetValueOrDefault(i.WareHouseId);
 
-            return new GetBatchInventoryDTO
-            {
-                ProductId = i.ProductId,
-                StockQuantity = i.StockQuantity,
-                CorrelationId = i.CorrelationId,
-                WareHouseId = i.WareHouseId,
+            var wareHouseDTO = wareHouse != null ? WareHouseDTO.FromResult(wareHouse) : null;
 
-                WareHouse = wareHouse != null ? new WareHouseDTO
-                {
-                    Id = i.WareHouseId,
-                    Address = wareHouse.Address,
-                    OwnerName = wareHouse.OwnerName,
-                    OwnerEmail = wareHouse.OwnerEmail,
-                    OwnerPhone = wareHouse.OwnerPhone,
-                } : new WareHouseDTO()
-            };
+            return GetBatchInventoryDTO.Init(i.ProductId, i.StockQuantity, i.CorrelationId, i.WareHouseId, wareHouseDTO);
         }).ToList();
     }
 }
