@@ -8,6 +8,7 @@
     <Folder Include="Interfaces\" />
     <Folder Include="Inventories\Commands\" />
     <Folder Include="Inventories\Queries\" />
+    <Folder Include="Orders\DTOs\" />
     <Folder Include="WareHouse\" />
     <Folder Include="WareHouse\Commands\" />
     <Folder Include="WareHouse\DTOs\" />

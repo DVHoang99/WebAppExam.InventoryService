@@ -17,6 +17,7 @@ using WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer
 using WebAppExam.InventoryService.API.Common;
 using WebAppExam.InventoryService.API.Services;
 using WebAppExam.InventoryService.API.Services.Grpc;
+using WebAppExam.InventoryService.Application.Orders.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var kafkaBrokers = builder.Configuration.GetSection("KafkaConfig:Brokers").Get<string[]>()
@@ -204,6 +205,7 @@ builder.Services.AddScoped<IWareHouseRepository, WareHouseRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ICacheLockService, CacheLockService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();

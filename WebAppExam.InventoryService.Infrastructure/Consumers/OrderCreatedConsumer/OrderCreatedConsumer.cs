@@ -1,7 +1,8 @@
 using KafkaFlow;
-using KafkaFlow.Producers;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
+using WebAppExam.InventoryService.Application.Orders.DTOs;
+using WebAppExam.InventoryService.Application.Orders.Services;
 using WebAppExam.InventoryService.Domain.Enum;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers;
@@ -9,14 +10,15 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers;
 public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
 {
     private readonly IInventoryService _inventoryService;
-    private readonly IProducerAccessor _producerAccessor;
+    private readonly IOrderService _orderService;
+
 
     public OrderCreatedConsumer(
         IInventoryService inventoryService,
-        IProducerAccessor producerAccessor)
+        IOrderService orderService)
     {
         _inventoryService = inventoryService;
-        _producerAccessor = producerAccessor;
+        _orderService = orderService;
     }
 
     public async Task Handle(IMessageContext context, OrderCreatedEvent message)
@@ -47,26 +49,33 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
                 }).ToList();
 
                 (bool IsSuccess, string FailReason) stockDict = await _inventoryService.CheckAndDeductInventoryAsync(input);
-                var orderReplyProducer = _producerAccessor.GetProducer("order-reply");
-                await orderReplyProducer.ProduceAsync(message.OrderId, new
-                {
-                    OrderId = message.OrderId,
-                    Status = isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
-                    Reason = failReason
-                });
+
+                await SendMessageReply(message, isSuccess, failReason, input);
             }
         }
         catch (Exception ex)
         {
-            var orderReplyProducer = _producerAccessor.GetProducer("order-reply");
-            await orderReplyProducer.ProduceAsync(message.OrderId, new
+            var input = message.Items.Select(x => new OrderItemDTO
             {
-                OrderId = message.OrderId,
-                Status = OrderStatus.Failed,
-                Reason = "Lỗi hệ thống nội bộ Inventory"
-            });
+                ProductId = x.ProductId,
+                Quantity = x.Quantity,
+                WareHouseId = x.WareHouseId
+            }).ToList();
+
+            var reason = "Lỗi hệ thống nội bộ Inventory";
+
+            await SendMessageReply(message, false, reason, input);
 
             Console.WriteLine($"[Error] - Inventory Handler: {ex.Message}");
         }
+    }
+    private async Task SendMessageReply(OrderCreatedEvent message, bool isSuccess, string reason, List<OrderItemDTO> input)
+    {
+        var orderReply = OrderReplyDTO.FromResult(
+               message.OrderId,
+               isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
+               reason, "created", [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
+
+        await _orderService.SendMessageReply(orderReply, isSuccess, reason);
     }
 }
