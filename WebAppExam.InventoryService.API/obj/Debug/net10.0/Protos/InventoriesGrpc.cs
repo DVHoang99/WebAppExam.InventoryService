@@ -46,9 +46,61 @@ namespace WebAppExam.InventoryService.API.Protos {
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.CreateInventoryRequest> __Marshaller_CreateInventoryRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.CreateInventoryRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.CreateInventoryResponse> __Marshaller_CreateInventoryResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.CreateInventoryResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.GetInventoryRequest> __Marshaller_GetInventoryRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.GetInventoryRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.GetInventoryResponse> __Marshaller_GetInventoryResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.GetInventoryResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.UpdateInventoryRequest> __Marshaller_UpdateInventoryRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.UpdateInventoryRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.UpdateInventoryResponse> __Marshaller_UpdateInventoryResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.UpdateInventoryResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.DeleteInventoryRequest> __Marshaller_DeleteInventoryRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.DeleteInventoryRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.DeleteInventoryResponse> __Marshaller_DeleteInventoryResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.DeleteInventoryResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesRequest> __Marshaller_GetBatchInventoriesRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesResponse> __Marshaller_GetBatchInventoriesResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsRequest> __Marshaller_GetByCorrelationIdsRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsResponse> __Marshaller_GetByCorrelationIdsResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsResponse.Parser));
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::WebAppExam.InventoryService.API.Protos.CreateInventoryRequest, global::WebAppExam.InventoryService.API.Protos.CreateInventoryResponse> __Method_CreateInventory = new grpc::Method<global::WebAppExam.InventoryService.API.Protos.CreateInventoryRequest, global::WebAppExam.InventoryService.API.Protos.CreateInventoryResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "CreateInventory",
+        __Marshaller_CreateInventoryRequest,
+        __Marshaller_CreateInventoryResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::WebAppExam.InventoryService.API.Protos.GetInventoryRequest, global::WebAppExam.InventoryService.API.Protos.GetInventoryResponse> __Method_GetInventory = new grpc::Method<global::WebAppExam.InventoryService.API.Protos.GetInventoryRequest, global::WebAppExam.InventoryService.API.Protos.GetInventoryResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetInventory",
+        __Marshaller_GetInventoryRequest,
+        __Marshaller_GetInventoryResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::WebAppExam.InventoryService.API.Protos.UpdateInventoryRequest, global::WebAppExam.InventoryService.API.Protos.UpdateInventoryResponse> __Method_UpdateInventory = new grpc::Method<global::WebAppExam.InventoryService.API.Protos.UpdateInventoryRequest, global::WebAppExam.InventoryService.API.Protos.UpdateInventoryResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "UpdateInventory",
+        __Marshaller_UpdateInventoryRequest,
+        __Marshaller_UpdateInventoryResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::WebAppExam.InventoryService.API.Protos.DeleteInventoryRequest, global::WebAppExam.InventoryService.API.Protos.DeleteInventoryResponse> __Method_DeleteInventory = new grpc::Method<global::WebAppExam.InventoryService.API.Protos.DeleteInventoryRequest, global::WebAppExam.InventoryService.API.Protos.DeleteInventoryResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "DeleteInventory",
+        __Marshaller_DeleteInventoryRequest,
+        __Marshaller_DeleteInventoryResponse);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesRequest, global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesResponse> __Method_GetBatchInventories = new grpc::Method<global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesRequest, global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesResponse>(
@@ -57,6 +109,14 @@ namespace WebAppExam.InventoryService.API.Protos {
         "GetBatchInventories",
         __Marshaller_GetBatchInventoriesRequest,
         __Marshaller_GetBatchInventoriesResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsRequest, global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsResponse> __Method_GetByCorrelationIds = new grpc::Method<global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsRequest, global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetByCorrelationIds",
+        __Marshaller_GetByCorrelationIdsRequest,
+        __Marshaller_GetByCorrelationIdsResponse);
 
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
@@ -69,7 +129,37 @@ namespace WebAppExam.InventoryService.API.Protos {
     public abstract partial class InventoryGrpcBase
     {
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::WebAppExam.InventoryService.API.Protos.CreateInventoryResponse> CreateInventory(global::WebAppExam.InventoryService.API.Protos.CreateInventoryRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::WebAppExam.InventoryService.API.Protos.GetInventoryResponse> GetInventory(global::WebAppExam.InventoryService.API.Protos.GetInventoryRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::WebAppExam.InventoryService.API.Protos.UpdateInventoryResponse> UpdateInventory(global::WebAppExam.InventoryService.API.Protos.UpdateInventoryRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::WebAppExam.InventoryService.API.Protos.DeleteInventoryResponse> DeleteInventory(global::WebAppExam.InventoryService.API.Protos.DeleteInventoryRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
       public virtual global::System.Threading.Tasks.Task<global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesResponse> GetBatchInventories(global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsResponse> GetByCorrelationIds(global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -82,7 +172,12 @@ namespace WebAppExam.InventoryService.API.Protos {
     public static grpc::ServerServiceDefinition BindService(InventoryGrpcBase serviceImpl)
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
-          .AddMethod(__Method_GetBatchInventories, serviceImpl.GetBatchInventories).Build();
+          .AddMethod(__Method_CreateInventory, serviceImpl.CreateInventory)
+          .AddMethod(__Method_GetInventory, serviceImpl.GetInventory)
+          .AddMethod(__Method_UpdateInventory, serviceImpl.UpdateInventory)
+          .AddMethod(__Method_DeleteInventory, serviceImpl.DeleteInventory)
+          .AddMethod(__Method_GetBatchInventories, serviceImpl.GetBatchInventories)
+          .AddMethod(__Method_GetByCorrelationIds, serviceImpl.GetByCorrelationIds).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the service binding logic.
@@ -92,7 +187,12 @@ namespace WebAppExam.InventoryService.API.Protos {
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     public static void BindService(grpc::ServiceBinderBase serviceBinder, InventoryGrpcBase serviceImpl)
     {
+      serviceBinder.AddMethod(__Method_CreateInventory, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::WebAppExam.InventoryService.API.Protos.CreateInventoryRequest, global::WebAppExam.InventoryService.API.Protos.CreateInventoryResponse>(serviceImpl.CreateInventory));
+      serviceBinder.AddMethod(__Method_GetInventory, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::WebAppExam.InventoryService.API.Protos.GetInventoryRequest, global::WebAppExam.InventoryService.API.Protos.GetInventoryResponse>(serviceImpl.GetInventory));
+      serviceBinder.AddMethod(__Method_UpdateInventory, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::WebAppExam.InventoryService.API.Protos.UpdateInventoryRequest, global::WebAppExam.InventoryService.API.Protos.UpdateInventoryResponse>(serviceImpl.UpdateInventory));
+      serviceBinder.AddMethod(__Method_DeleteInventory, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::WebAppExam.InventoryService.API.Protos.DeleteInventoryRequest, global::WebAppExam.InventoryService.API.Protos.DeleteInventoryResponse>(serviceImpl.DeleteInventory));
       serviceBinder.AddMethod(__Method_GetBatchInventories, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesRequest, global::WebAppExam.InventoryService.API.Protos.GetBatchInventoriesResponse>(serviceImpl.GetBatchInventories));
+      serviceBinder.AddMethod(__Method_GetByCorrelationIds, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsRequest, global::WebAppExam.InventoryService.API.Protos.GetByCorrelationIdsResponse>(serviceImpl.GetByCorrelationIds));
     }
 
   }

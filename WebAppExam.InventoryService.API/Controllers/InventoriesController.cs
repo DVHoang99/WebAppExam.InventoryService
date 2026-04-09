@@ -1,7 +1,5 @@
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 using WebAppExam.InventoryService.Application.Inventories.Commands;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Application.Inventories.Queries;

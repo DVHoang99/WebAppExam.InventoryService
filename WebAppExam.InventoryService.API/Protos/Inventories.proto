@@ -2,7 +2,49 @@ syntax = "proto3";
 
 option csharp_namespace = "WebAppExam.InventoryService.API.Protos";
 service InventoryGrpc {
+  rpc CreateInventory (CreateInventoryRequest) returns (CreateInventoryResponse);
+  rpc GetInventory (GetInventoryRequest) returns (GetInventoryResponse);
+  rpc UpdateInventory (UpdateInventoryRequest) returns (UpdateInventoryResponse);
+  rpc DeleteInventory (DeleteInventoryRequest) returns (DeleteInventoryResponse);
   rpc GetBatchInventories (GetBatchInventoriesRequest) returns (GetBatchInventoriesResponse);
+  rpc GetByCorrelationIds (GetByCorrelationIdsRequest) returns (GetByCorrelationIdsResponse);
+}
+
+message CreateInventoryRequest {
+  InventoryDTO inventory = 1;
+}
+
+message CreateInventoryResponse {
+  InventoryDTO inventory = 1;
+}
+
+message GetInventoryRequest {
+  string id = 1;
+}
+
+message GetInventoryResponse {
+  InventoryDTO inventory = 1;
+}
+
+message UpdateInventoryRequest {
+  string id = 1;
+  string ware_house_id = 2;
+  int32 stock = 3;
+  string update_event_id = 4;
+}
+
+message UpdateInventoryResponse {
+  InventoryDTO inventory = 1;
+}
+
+message DeleteInventoryRequest {
+  string id = 1;
+  string ware_house_id = 2;
+}
+
+message DeleteInventoryResponse {
+  bool success = 1;
+  string message = 2;
 }
 
 message GetBatchInventoriesRequest {
@@ -11,6 +53,14 @@ message GetBatchInventoriesRequest {
 
 message GetBatchInventoriesResponse {
     repeated InventoryDTO inventories = 1;
+}
+
+message GetByCorrelationIdsRequest {
+  repeated string correlation_ids = 1;
+}
+
+message GetByCorrelationIdsResponse {
+  repeated InventoryDTO inventories = 1;
 }
 
 message InventoryDTO {
