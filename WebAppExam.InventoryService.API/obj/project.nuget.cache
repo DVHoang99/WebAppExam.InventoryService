@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "ZEtbtrTh/8Y=",
+  "dgSpecHash": "u/NS/4Yxb6k=",
   "success": true,
   "projectFilePath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.API\\WebAppExam.InventoryService.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hoangdv\\.nuget\\packages\\confluent.kafka\\2.8.0\\confluent.kafka.2.8.0.nupkg.sha512",
     "C:\\Users\\hoangdv\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
-    "C:\\Users\\hoangdv\\.nuget\\packages\\google.protobuf\\3.31.1\\google.protobuf.3.31.1.nupkg.sha512",
+    "C:\\Users\\hoangdv\\.nuget\\packages\\google.protobuf\\3.34.1\\google.protobuf.3.34.1.nupkg.sha512",
     "C:\\Users\\hoangdv\\.nuget\\packages\\grpc.aspnetcore\\2.76.0\\grpc.aspnetcore.2.76.0.nupkg.sha512",
     "C:\\Users\\hoangdv\\.nuget\\packages\\grpc.aspnetcore.server\\2.76.0\\grpc.aspnetcore.server.2.76.0.nupkg.sha512",
     "C:\\Users\\hoangdv\\.nuget\\packages\\grpc.aspnetcore.server.clientfactory\\2.76.0\\grpc.aspnetcore.server.clientfactory.2.76.0.nupkg.sha512",

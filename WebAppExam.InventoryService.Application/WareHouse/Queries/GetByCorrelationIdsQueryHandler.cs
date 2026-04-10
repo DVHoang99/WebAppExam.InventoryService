@@ -3,6 +3,7 @@ using MediatR;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Application.Inventories.Queries;
+using WebAppExam.InventoryService.Application.Repositories;
 using WebAppExam.InventoryService.Application.WareHouse.DTOs;
 
 namespace WebAppExam.InventoryService.Application.WareHouse.Queries;

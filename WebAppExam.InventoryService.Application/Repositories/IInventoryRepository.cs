@@ -2,7 +2,7 @@ using System;
 using WebAppExam.InventoryService.Domain.Common;
 using WebAppExam.InventoryService.Domain.Entity;
 
-namespace WebAppExam.InventoryService.Application.Interfaces;
+namespace WebAppExam.InventoryService.Application.Repositories;
 
 public interface IInventoryRepository : IBaseRepository<Inventory>
 {

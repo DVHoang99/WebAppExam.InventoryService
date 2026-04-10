@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using StackExchange.Redis;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Orders.Services;
+using WebAppExam.InventoryService.Application.Repositories;
 using WebAppExam.InventoryService.Infrastructure.Constants;
 using WebAppExam.InventoryService.Infrastructure.Repositories;
 using WebAppExam.InventoryService.Infrastructure.Services;
@@ -44,6 +45,7 @@ public static class DependencyInjection
         // Register Repositories
         services.AddScoped<IWareHouseRepository, WareHouseRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services.AddScoped<IInboxRepository, InboxRepository>();
 
         // Register Services
         services.AddScoped<ICacheLockService, CacheLockService>();

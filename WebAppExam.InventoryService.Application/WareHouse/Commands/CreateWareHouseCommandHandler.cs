@@ -1,6 +1,6 @@
 using System;
 using MediatR;
-using WebAppExam.InventoryService.Application.Interfaces;
+using WebAppExam.InventoryService.Application.Repositories;
 using WebAppExam.InventoryService.Application.WareHouse.DTOs;
 
 namespace WebAppExam.InventoryService.Application.WareHouse.Commands;

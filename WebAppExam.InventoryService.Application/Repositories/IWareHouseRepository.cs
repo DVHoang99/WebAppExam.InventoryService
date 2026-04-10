@@ -1,7 +1,7 @@
 
 using WebAppExam.InventoryService.Domain.Common;
 
-namespace WebAppExam.InventoryService.Application.Interfaces;
+namespace WebAppExam.InventoryService.Application.Repositories;
 
 public interface IWareHouseRepository : IBaseRepository<Domain.Entity.WareHouse>
 {

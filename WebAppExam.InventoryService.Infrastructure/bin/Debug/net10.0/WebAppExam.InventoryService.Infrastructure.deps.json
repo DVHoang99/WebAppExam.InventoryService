@@ -504,6 +504,7 @@
       },
       "WebAppExam.InventoryService.Domain/1.0.0": {
         "dependencies": {
+          "MongoDB.Driver": "3.7.1",
           "Ulid": "1.4.1"
         },
         "runtime": {

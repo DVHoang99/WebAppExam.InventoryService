@@ -18,6 +18,7 @@
           "MediatR": "14.1.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.5",
           "Microsoft.AspNetCore.OpenApi": "10.0.5",
+          "WebAppExam.GrpcContracts": "1.0.0",
           "WebAppExam.InventoryService.Application": "1.0.0",
           "WebAppExam.InventoryService.Infrastructure": "1.0.0"
         },
@@ -44,17 +45,17 @@
           }
         }
       },
-      "Google.Protobuf/3.31.1": {
+      "Google.Protobuf/3.34.1": {
         "runtime": {
           "lib/net5.0/Google.Protobuf.dll": {
-            "assemblyVersion": "3.31.1.0",
-            "fileVersion": "3.31.1.0"
+            "assemblyVersion": "3.34.1.0",
+            "fileVersion": "3.34.1.0"
           }
         }
       },
       "Grpc.AspNetCore/2.76.0": {
         "dependencies": {
-          "Google.Protobuf": "3.31.1",
+          "Google.Protobuf": "3.34.1",
           "Grpc.AspNetCore.Server.ClientFactory": "2.76.0"
         }
       },
@@ -83,7 +84,7 @@
       },
       "Grpc.AspNetCore.Server.Reflection/2.76.0": {
         "dependencies": {
-          "Google.Protobuf": "3.31.1",
+          "Google.Protobuf": "3.34.1",
           "Grpc.AspNetCore.Server": "2.76.0",
           "Grpc.Reflection": "2.76.0"
         },
@@ -137,7 +138,7 @@
       },
       "Grpc.Reflection/2.76.0": {
         "dependencies": {
-          "Google.Protobuf": "3.31.1",
+          "Google.Protobuf": "3.34.1",
           "Grpc.Core.Api": "2.76.0"
         },
         "runtime": {
@@ -574,6 +575,19 @@
           }
         }
       },
+      "WebAppExam.GrpcContracts/1.0.0": {
+        "dependencies": {
+          "Google.Protobuf": "3.34.1",
+          "Grpc.AspNetCore": "2.76.0",
+          "Grpc.Net.Client": "2.76.0"
+        },
+        "runtime": {
+          "WebAppExam.GrpcContracts.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "WebAppExam.InventoryService.Application/1.0.0": {
         "dependencies": {
           "MediatR": "14.1.0",
@@ -588,6 +602,7 @@
       },
       "WebAppExam.InventoryService.Domain/1.0.0": {
         "dependencies": {
+          "MongoDB.Driver": "3.7.1",
           "Ulid": "1.4.1"
         },
         "runtime": {
@@ -637,12 +652,12 @@
       "path": "dnsclient/1.6.1",
       "hashPath": "dnsclient.1.6.1.nupkg.sha512"
     },
-    "Google.Protobuf/3.31.1": {
+    "Google.Protobuf/3.34.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-gSnJbUmGiOTdWddPhqzrEscHq9Ls6sqRDPB9WptckyjTUyx70JOOAaDLkFff8gManZNN3hllQ4aQInnQyq/Z/A==",
-      "path": "google.protobuf/3.31.1",
-      "hashPath": "google.protobuf.3.31.1.nupkg.sha512"
+      "sha512": "sha512-212vdYxRuVopGE5bess6Jg5oXWyizA6hcLPTI7G+qA4PthQEvfeof3njT+7VSY5v/+O0P22xTydiP5fSJJpGEA==",
+      "path": "google.protobuf/3.34.1",
+      "hashPath": "google.protobuf.3.34.1.nupkg.sha512"
     },
     "Grpc.AspNetCore/2.76.0": {
       "type": "package",
@@ -923,6 +938,11 @@
       "sha512": "sha512-U9Ix4l4cl58Kzz1rJzj5hoVTjmbx1qGMwzAcbv1j/d3NzrFaESIurQyg+ow4mivCgkE3S413y+U9k4WdnEIkRA==",
       "path": "zstdsharp.port/0.7.3",
       "hashPath": "zstdsharp.port.0.7.3.nupkg.sha512"
+    },
+    "WebAppExam.GrpcContracts/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "WebAppExam.InventoryService.Application/1.0.0": {
       "type": "project",

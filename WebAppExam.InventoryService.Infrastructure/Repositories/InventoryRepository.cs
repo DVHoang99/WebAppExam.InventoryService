@@ -1,17 +1,12 @@
 using System;
 using MongoDB.Driver;
-using WebAppExam.InventoryService.Application.Interfaces;
+using WebAppExam.InventoryService.Application.Repositories;
 using WebAppExam.InventoryService.Domain.Entity;
 
 namespace WebAppExam.InventoryService.Infrastructure.Repositories;
 
-public class InventoryRepository : BaseRepository<Inventory>, IInventoryRepository
+public class InventoryRepository(IMongoDatabase database) : BaseRepository<Inventory>(database, "Inventories"), IInventoryRepository
 {
-    public InventoryRepository(IMongoDatabase database)
-        : base(database, "Inventories")
-    {
-    }
-
     public async Task<Inventory> GetByProductIdAsync(string productId, CancellationToken cancellationToken = default)
     {
         var filter = Builders<Inventory>.Filter.Eq(x => x.ProductId, productId);

@@ -1,5 +1,6 @@
 using KafkaFlow;
 using KafkaFlow.Producers;
+using MongoDB.Driver;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Application.Orders.DTOs;
@@ -12,15 +13,20 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledCons
     {
         private readonly IInventoryService _inventoryService;
         private readonly IOrderService _orderService;
+        private readonly IMongoClient _mongoClient;
 
-        public OrderCanceledConsumer(IInventoryService inventoryService, IProducerAccessor producerAccessor, IOrderService orderService)
+        public OrderCanceledConsumer(IInventoryService inventoryService, IProducerAccessor producerAccessor, IOrderService orderService, IMongoClient mongoClient)
         {
             _inventoryService = inventoryService;
             _orderService = orderService;
+            _mongoClient = mongoClient;
         }
 
         public async Task Handle(IMessageContext context, OrderCanceledEvent message)
         {
+            using var session = await _mongoClient.StartSessionAsync();
+            session.StartTransaction();
+
             try
             {
                 if (message.Items != null && message.Items.Any())
@@ -35,10 +41,13 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledCons
 
                     (bool IsSuccess, string FailReason) stockDict = await _inventoryService.CheckAndDeductInventoryAsync(input);
                     await SendMessageReply(message, stockDict.IsSuccess, stockDict.FailReason, input);
+                    await session.CommitTransactionAsync();
                 }
             }
             catch (Exception ex)
             {
+                if (session.IsInTransaction) await session.AbortTransactionAsync();
+
                 var input = message.Items.Select(x => new OrderItemDTO
                 {
                     ProductId = x.ProductId,

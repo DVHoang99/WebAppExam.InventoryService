@@ -2,6 +2,7 @@ using System;
 using KafkaFlow;
 using KafkaFlow.Producers;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using StackExchange.Redis;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
@@ -15,17 +16,23 @@ public class OrderUpdatedConsumer : IMessageHandler<OrderUpdatedEvent>
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IOrderService _orderService;
+    private readonly IMongoClient _mongoClient;
 
     public OrderUpdatedConsumer(
         IServiceProvider serviceProvider,
-        IOrderService orderService)
+        IOrderService orderService,
+        IMongoClient mongoClient)
     {
         _serviceProvider = serviceProvider;
         _orderService = orderService;
+        _mongoClient = mongoClient;
     }
 
     public async Task Handle(IMessageContext context, OrderUpdatedEvent message)
     {
+        using var session = await _mongoClient.StartSessionAsync();
+        session.StartTransaction();
+
         try
         {
             using var scope = _serviceProvider.CreateScope();
@@ -40,10 +47,13 @@ public class OrderUpdatedConsumer : IMessageHandler<OrderUpdatedEvent>
 
             (bool IsSuccess, string FailReason) stockDict = await inventoryRepo.CheckAndDeductInventoryAsync(input);
             await SendMessageReply(message, stockDict.IsSuccess, stockDict.FailReason, input);
+            await session.CommitTransactionAsync();
 
         }
         catch (Exception ex)
         {
+            if (session.IsInTransaction) await session.AbortTransactionAsync();
+
             var input = message.Items.Select(x => new OrderItemDTO
             {
                 ProductId = x.ProductId,

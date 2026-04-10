@@ -8,6 +8,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsu
     public class OrderDeletedEvent
     {
         public string OrderId { get; set; }
+        public string IdempotencyId { get; set; }
         public List<OrderItemEvent> Items { get; set; } = new();
     }
 }

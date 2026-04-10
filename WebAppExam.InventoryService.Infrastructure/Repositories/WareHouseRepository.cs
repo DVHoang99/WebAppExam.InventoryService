@@ -1,6 +1,6 @@
 using System;
 using MongoDB.Driver;
-using WebAppExam.InventoryService.Application.Interfaces;
+using WebAppExam.InventoryService.Application.Repositories;
 using WebAppExam.InventoryService.Domain.Entity;
 
 namespace WebAppExam.InventoryService.Infrastructure.Repositories;

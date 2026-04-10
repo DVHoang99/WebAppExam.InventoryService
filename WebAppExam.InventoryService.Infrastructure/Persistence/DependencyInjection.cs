@@ -2,6 +2,7 @@ using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebAppExam.InventoryService.Application.Interfaces;
+using WebAppExam.InventoryService.Application.Repositories;
 using WebAppExam.InventoryService.Infrastructure.Repositories;
 
 namespace WebAppExam.InventoryService.Infrastructure.Persistence;

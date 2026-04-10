@@ -1,7 +1,7 @@
 using System;
 using Grpc.Core;
 using MediatR;
-using WebAppExam.InventoryService.API.Protos;
+using WebAppExam.GrpcContracts.Protos;
 using WebAppExam.InventoryService.Application.Inventories.Commands;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Application.Inventories.Queries;
@@ -105,13 +105,13 @@ public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
 
         var response = new GetBatchInventoriesResponse();
 
-        var inventoryDtos = result.Select(x => new Protos.InventoryDTO
+        var inventoryDtos = result.Select(x => new WebAppExam.GrpcContracts.Protos.InventoryDTO
         {
             ProductId = x.ProductId,
             StockQuantity = x.StockQuantity,
             CorrelationId = x.CorrelationId ?? "",
             WareHouseId = x.WareHouseId ?? "",
-            WareHouse = x.WareHouse != null ? new Protos.WareHouseDTO
+            WareHouse = x.WareHouse != null ? new WebAppExam.GrpcContracts.Protos.WareHouseDTO
             {
                 Id = x.WareHouse.Id,
                 Address = x.WareHouse.Address ?? "",
@@ -134,13 +134,13 @@ public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
 
         var response = new GetByCorrelationIdsResponse();
 
-        var inventoryDtos = result.Select(x => new Protos.InventoryDTO
+        var inventoryDtos = result.Select(x => new WebAppExam.GrpcContracts.Protos.InventoryDTO
         {
             ProductId = x.ProductId,
             StockQuantity = x.StockQuantity,
             CorrelationId = x.CorrelationId ?? "",
             WareHouseId = x.WareHouseId ?? "",
-            WareHouse = x.WareHouse != null ? new Protos.WareHouseDTO
+            WareHouse = x.WareHouse != null ? new WebAppExam.GrpcContracts.Protos.WareHouseDTO
             {
                 Id = x.WareHouse.Id,
                 Address = x.WareHouse.Address ?? "",
@@ -155,9 +155,9 @@ public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
         return response;
     }
 
-    private static Protos.InventoryDTO MapToProtoInventory(WebAppExam.InventoryService.Application.Inventories.DTOs.InventoryDTO inventory)
+    private static WebAppExam.GrpcContracts.Protos.InventoryDTO MapToProtoInventory(WebAppExam.InventoryService.Application.Inventories.DTOs.InventoryDTO inventory)
     {
-        return new Protos.InventoryDTO
+        return new WebAppExam.GrpcContracts.Protos.InventoryDTO
         {
             ProductId = inventory.ProductId,
             StockQuantity = inventory.StockQuantity,
@@ -167,15 +167,15 @@ public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
         };
     }
 
-    private static Protos.InventoryDTO MapToProtoInventory(GetBatchInventoryDTO inventory)
+    private static WebAppExam.GrpcContracts.Protos.InventoryDTO MapToProtoInventory(GetBatchInventoryDTO inventory)
     {
-        return new Protos.InventoryDTO
+        return new WebAppExam.GrpcContracts.Protos.InventoryDTO
         {
             ProductId = inventory.ProductId,
             StockQuantity = inventory.StockQuantity,
             CorrelationId = inventory.CorrelationId ?? "",
             WareHouseId = inventory.WareHouseId ?? "",
-            WareHouse = inventory.WareHouse != null ? new Protos.WareHouseDTO
+            WareHouse = inventory.WareHouse != null ? new WebAppExam.GrpcContracts.Protos.WareHouseDTO
             {
                 Id = inventory.WareHouse.Id,
                 Address = inventory.WareHouse.Address ?? "",

@@ -22,17 +22,12 @@
   <ItemGroup>
     <ProjectReference Include="..\WebAppExam.InventoryService.Application\WebAppExam.InventoryService.Application.csproj" />
     <ProjectReference Include="..\WebAppExam.InventoryService.Infrastructure\WebAppExam.InventoryService.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="Protos\Inventories.proto" GrpcServices="Server" />
-    <Protobuf Include="Protos\Warehouses.proto" GrpcServices="Server" />
+    <ProjectReference Include="..\..\WebAppExam\WebAppExam.GrpcContracts\WebAppExam.GrpcContracts.csproj" />
   </ItemGroup>
   
   <ItemGroup>
     <Folder Include="Common\" />
     <Folder Include="Controllers\" />
-    <Folder Include="Protos\" />
   </ItemGroup>
 
 </Project>

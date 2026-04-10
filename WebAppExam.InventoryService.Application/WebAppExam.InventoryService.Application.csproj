@@ -5,6 +5,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="InboxMessages\" />
+    <Folder Include="InboxMessages\Services\" />
     <Folder Include="Interfaces\" />
     <Folder Include="Inventories\Commands\" />
     <Folder Include="Inventories\Queries\" />

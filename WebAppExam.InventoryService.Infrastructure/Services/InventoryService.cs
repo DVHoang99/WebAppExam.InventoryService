@@ -1,6 +1,8 @@
 using System;
+using MongoDB.Driver;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
+using WebAppExam.InventoryService.Application.Repositories;
 
 namespace WebAppExam.InventoryService.Infrastructure.Services;
 
@@ -16,24 +18,26 @@ public class InventoryService : IInventoryService
         _wareHouseRepository = wareHouseRepository;
     }
 
-    public async Task<(bool IsSuccess, string FailReason)> CheckAndDeductInventoryAsync(IEnumerable<OrderItemDTO> items)
+    public async Task<(bool IsSuccess, string FailReason)> CheckAndDeductInventoryAsync(
+    IEnumerable<OrderItemDTO> items)
     {
         if (items == null || !items.Any())
             return (true, string.Empty);
 
         var requiredStocks = items
-        .GroupBy(x => new { ProductId = Ulid.Parse(x.ProductId), WarehouseId = Ulid.Parse(x.WareHouseId) })
-        .Select(g => new
-        {
-            g.Key.ProductId,
-            g.Key.WarehouseId,
-            TotalRequired = g.Sum(x => x.Quantity),
-            RawProductIdStr = g.First().ProductId
-        })
-        .ToList();
+            .GroupBy(x => new { ProductId = Ulid.Parse(x.ProductId), WarehouseId = Ulid.Parse(x.WareHouseId) })
+            .Select(g => new
+            {
+                g.Key.ProductId,
+                g.Key.WarehouseId,
+                TotalRequired = g.Sum(x => x.Quantity),
+                RawProductIdStr = g.First().ProductId
+            })
+            .ToList();
 
         var keysToFetch = requiredStocks.Select(x => (x.ProductId, x.WarehouseId)).ToList();
 
+        // 1. Lấy stock - Truyền session để đảm bảo đọc dữ liệu nhất quán trong transaction
         var stockDict = await _inventoryRepo.GetStocksBulkAsync(keysToFetch);
 
         foreach (var req in requiredStocks)
@@ -46,6 +50,7 @@ public class InventoryService : IInventoryService
             }
         }
 
+        // 2. Trừ kho - Truyền session để việc trừ kho nằm trong transaction
         foreach (var item in items)
         {
             await _inventoryRepo.DeductStockAsync(

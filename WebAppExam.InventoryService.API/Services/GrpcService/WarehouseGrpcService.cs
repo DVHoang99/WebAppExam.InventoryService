@@ -1,7 +1,7 @@
 
 using Grpc.Core;
 using MediatR;
-using WebAppExam.InventoryService.API.Protos;
+using WebAppExam.GrpcContracts.Protos;
 using WebAppExam.InventoryService.Application.WareHouse.Queries;
 
 namespace WebAppExam.InventoryService.API.Services.Grpc;

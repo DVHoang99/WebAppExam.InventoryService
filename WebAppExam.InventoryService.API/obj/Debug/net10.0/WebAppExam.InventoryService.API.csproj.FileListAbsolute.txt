@@ -101,3 +101,5 @@ C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventorySe
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.API\bin\Debug\net10.0\Grpc.Net.ClientFactory.dll
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.API\bin\Debug\net10.0\Grpc.Net.Common.dll
 C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.API\bin\Debug\net10.0\Grpc.Reflection.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.API\bin\Debug\net10.0\WebAppExam.GrpcContracts.dll
+C:\Users\hoangdv\source\repos\WebAppExam.InventoryService\WebAppExam.InventoryService.API\bin\Debug\net10.0\WebAppExam.GrpcContracts.pdb
