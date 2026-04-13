@@ -6,8 +6,12 @@ using WebAppExam.InventoryService.API.Services;
 using WebAppExam.InventoryService.API.Services.Grpc;
 using WebAppExam.InventoryService.Application;
 using WebAppExam.InventoryService.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration));
 
 // Add services from each layer
 builder.Services.AddApplicationServices();

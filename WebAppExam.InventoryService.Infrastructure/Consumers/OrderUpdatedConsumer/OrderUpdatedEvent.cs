@@ -5,6 +5,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderUpdatedConsu
 
 public class OrderUpdatedEvent
 {
+    public string IdempotencyId { get; set; }
     public string OrderId { get; set; }
     public string CustomerName { get; set; }
     public OrderStatus Status { get; set; }

@@ -4,14 +4,14 @@
     "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Infrastructure\\WebAppExam.InventoryService.Infrastructure.csproj": {}
   },
   "projects": {
-    "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj": {
+    "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj",
+        "projectUniqueName": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj",
         "projectName": "WebAppExam.InventoryService.Application",
-        "projectPath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj",
+        "projectPath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj",
         "packagesPath": "C:\\Users\\hoangdv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\obj\\",
+        "outputPath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -33,8 +33,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj": {
-                "projectPath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj"
+              "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj": {
+                "projectPath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj"
               }
             }
           }
@@ -354,14 +354,14 @@
         }
       }
     },
-    "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj": {
+    "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj",
+        "projectUniqueName": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj",
         "projectName": "WebAppExam.InventoryService.Domain",
-        "projectPath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj",
+        "projectPath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\WebAppExam.InventoryService.Domain.csproj",
         "packagesPath": "C:\\Users\\hoangdv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\obj\\",
+        "outputPath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -733,8 +733,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj": {
-                "projectPath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj"
+              "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj": {
+                "projectPath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj"
               }
             }
           }

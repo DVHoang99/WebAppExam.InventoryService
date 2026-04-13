@@ -1,37 +1,69 @@
 using KafkaFlow;
-using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
-using WebAppExam.InventoryService.Application.Repositories;
+using WebAppExam.InventoryService.Application.Orders.DTOs;
+using WebAppExam.InventoryService.Application.Orders.Services;
+using WebAppExam.InventoryService.Domain.Enum;
 using WebAppExam.InventoryService.Domain.Entity;
+using WebAppExam.InventoryService.Application.Repositories;
+using Microsoft.Extensions.Logging;
 
-namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsumer
+namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsumer;
+
+public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
 {
-    public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
+    private readonly IInventoryService _inventoryService;
+    private readonly IOrderService _orderService;
+    private readonly ICacheLockService _cacheLockService;
+    private readonly IMongoClient _mongoClient;
+    private readonly IInboxRepository _inboxRepository;
+    private readonly ILogger<OrderDeletedConsumer> _logger;
+
+    public OrderDeletedConsumer(
+        IInventoryService inventoryService,
+        IOrderService orderService,
+        ICacheLockService cacheLockService,
+        IMongoClient mongoClient,
+        IInboxRepository inboxRepository,
+        ILogger<OrderDeletedConsumer> logger)
     {
-        private readonly IServiceProvider _serviceProvider;
+        _inventoryService = inventoryService;
+        _orderService = orderService;
+        _cacheLockService = cacheLockService;
+        _mongoClient = mongoClient;
+        _inboxRepository = inboxRepository;
+        _logger = logger;
+    }
 
-        public OrderDeletedConsumer(IServiceProvider serviceProvider)
+    public async Task Handle(IMessageContext context, OrderDeletedEvent message)
+    {
+        var idempotencyId = message.IdempotencyId;
+        var lockToken = Guid.NewGuid().ToString();
+        var lockKey = $"lock:idempotency:{idempotencyId}";
+
+        var acquiredLocks = await _cacheLockService.AcquireMultipleLocksAsync(
+            new[] { lockKey },
+            lockToken,
+            TimeSpan.FromSeconds(30));
+
+        if (!acquiredLocks.Any())
         {
-            _serviceProvider = serviceProvider;
+            _logger.LogWarning("Message {Id} đang được xử lý bởi worker khác.", idempotencyId);
+            return;
         }
-        public async Task Handle(IMessageContext context, OrderDeletedEvent message)
+
+        try
         {
-            using var scope = _serviceProvider.CreateScope();
-            var inventoryService = scope.ServiceProvider.GetRequiredService<IInventoryService>();
-            var inboxRepository = scope.ServiceProvider.GetRequiredService<IInboxRepository>();;
-
-            var idempotencyId = message.IdempotencyId;
-
-            try
+            var alreadyProcessed = await _inboxRepository.ExistsAsync(idempotencyId, nameof(OrderDeletedConsumer));
+            if (alreadyProcessed)
             {
-                var alreadyProcessed = await inboxRepository.ExistsAsync(idempotencyId, nameof(OrderCreatedConsumer));
-                if (alreadyProcessed)
-                {
-                    return;
-                }
+                _logger.LogInformation("Message {Id} đã được xử lý thành công trước đó.", idempotencyId);
+                return;
+            }
 
+            if (message.Items != null && message.Items.Any())
+            {
                 var input = message.Items.Select(x => new OrderItemDTO
                 {
                     ProductId = x.ProductId,
@@ -39,18 +71,44 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsu
                     WareHouseId = x.WareHouseId
                 }).ToList();
 
-                var stockResult = await inventoryService.CheckAndDeductInventoryAsync(input);
+                var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(input);
 
                 if (stockResult.IsSuccess)
                 {
-                    await inboxRepository.CreateAsync(InboxMessage.Init(idempotencyId, message.OrderId, nameof(OrderDeletedConsumer)));
+                    await _inboxRepository.CreateAsync(InboxMessage.Init(idempotencyId, message.OrderId, nameof(OrderDeletedConsumer)));
                 }
 
-            }
-            catch
-            {
-                throw; // Để Kafka retry
+                await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
             }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Error] - Inventory Handler: OrderId {OrderId}, IdempotencyId {Id}", message.OrderId, idempotencyId);
+
+            var input = message.Items?.Select(x => new OrderItemDTO
+            {
+                ProductId = x.ProductId,
+                Quantity = x.Quantity,
+                WareHouseId = x.WareHouseId
+            }).ToList() ?? new List<OrderItemDTO>();
+
+            await SendMessageReply(message, false, "Lỗi hệ thống nội bộ Inventory", input);
+            
+            throw;
+        }
+        finally
+        {
+            await _cacheLockService.ReleaseMultipleLocksAsync(acquiredLocks, lockToken);
+        }
+    }
+
+    private async Task SendMessageReply(OrderDeletedEvent message, bool isSuccess, string reason, List<OrderItemDTO> input)
+    {
+        var orderReply = OrderReplyDTO.FromResult(
+               message.OrderId,
+               isSuccess ? OrderStatus.Cancel : OrderStatus.Failed,
+               reason, "deleted", [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
+
+        await _orderService.SendMessageReply(orderReply, isSuccess, reason);
     }
 }

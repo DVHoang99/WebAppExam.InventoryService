@@ -8,6 +8,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledCons
 {
     public class OrderCanceledEvent
     {
+        public string IdempotencyId { get; set; }
         public string OrderId { get; set; }
         public OrderStatus Status { get; set; }
         public List<OrderItemEvent> Items { get; set; } = new();
