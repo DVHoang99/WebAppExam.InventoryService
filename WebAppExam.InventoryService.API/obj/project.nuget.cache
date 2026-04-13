@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "0zpHbhsVT54=",
+  "dgSpecHash": "M9+AazYlazo=",
   "success": true,
-  "projectFilePath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.API\\WebAppExam.InventoryService.API.csproj",
+  "projectFilePath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.API\\WebAppExam.InventoryService.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hoangdv\\.nuget\\packages\\confluent.kafka\\2.8.0\\confluent.kafka.2.8.0.nupkg.sha512",
     "C:\\Users\\hoangdv\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",

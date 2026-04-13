@@ -1594,8 +1594,8 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj": {
-              "projectPath": "c:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj"
+            "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj": {
+              "projectPath": "C:\\Users\\hoangdv\\source\\repos\\WebAppExam.InventoryService\\WebAppExam.InventoryService.Application\\WebAppExam.InventoryService.Application.csproj"
             }
           }
         }
