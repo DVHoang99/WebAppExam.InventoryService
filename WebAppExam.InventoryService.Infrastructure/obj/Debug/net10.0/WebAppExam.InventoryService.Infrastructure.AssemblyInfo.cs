@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebAppExam.InventoryService.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ab7e61d7aea6dd2b85ea417b031fac3066844fb2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+116b276a9d7c74eafa11efa5aa2e63a938370d46")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebAppExam.InventoryService.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebAppExam.InventoryService.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

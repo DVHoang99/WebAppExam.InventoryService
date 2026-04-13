@@ -21,15 +21,15 @@ public class CreateInventoryCommandhandler : IRequestHandler<CreateInventoryComm
 
         if (existingInventory != null)
         {
-            return InventoryDTO.FromResult(existingInventory);
+            return InventoryDTO.FromResult(existingInventory.ProductId, existingInventory.StockQuantity, existingInventory.CorrelationId, existingInventory.WareHouseId);
         }
 
         var id = Ulid.NewUlid().ToString();
 
-        var inventory = new Inventory(id, request.ProductId, request.StockQuantity, request.CorrelationId, request.WareHouseId);
+        var inventory = Domain.Entity.Inventory.Create(id, request.ProductId, request.StockQuantity, request.CorrelationId, request.WareHouseId);
 
         await _repository.AddAsync(inventory, cancellationToken);
 
-        return InventoryDTO.FromResult(inventory);
+        return InventoryDTO.FromResult(inventory.ProductId, inventory.StockQuantity, inventory.CorrelationId, inventory.WareHouseId);
     }
 }

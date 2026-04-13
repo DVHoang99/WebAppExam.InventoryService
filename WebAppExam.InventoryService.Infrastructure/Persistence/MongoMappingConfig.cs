@@ -13,7 +13,8 @@ public static class MongoMappingConfig
             BsonClassMap.RegisterClassMap<Inventory>(cm =>
             {
                 cm.AutoMap();
-                cm.MapIdProperty(c => c.Id);
+                cm.MapIdMember(c => c.Id);
+                cm.SetIgnoreExtraElements(true);
             });
         }
 
@@ -22,7 +23,8 @@ public static class MongoMappingConfig
             BsonClassMap.RegisterClassMap<WareHouse>(cm =>
             {
                 cm.AutoMap();
-                cm.MapIdProperty(c => c.Id);
+                cm.MapIdMember(c => c.Id);
+                cm.SetIgnoreExtraElements(true);
             });
         }
     }

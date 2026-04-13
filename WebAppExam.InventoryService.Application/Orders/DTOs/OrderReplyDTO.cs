@@ -1,27 +1,35 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using WebAppExam.InventoryService.Domain.Enum;
 
 namespace WebAppExam.InventoryService.Application.Orders.DTOs;
 
 public class OrderReplyDTO
 {
-    public string OrderId { get; init; }
+    public required string OrderId { get; init; }
     public OrderStatus Status { get; init; }
-    public string Reason { get; init; }
-    public string Action { get; init; }
-    public List<OrderDetailDTO> Data { get; init; }
+    public required string Reason { get; init; }
+    public required string Action { get; init; }
+    public string IdenpotencyId { get; init; }
+    public required List<OrderDetailDTO> Data { get; init; }
 
-    private OrderReplyDTO(string orderId, OrderStatus status, string reason, string action, List<OrderDetailDTO> data)
+    public OrderReplyDTO() { }
+
+    [SetsRequiredMembers]
+    private OrderReplyDTO(string orderId, OrderStatus status, string reason, string action, string idenpotencyId, List<OrderDetailDTO> data)
     {
         OrderId = orderId;
         Status = status;
         Reason = reason;
         Action = action;
+        IdenpotencyId = idenpotencyId;
         Data = data;
     }
 
+
     public static OrderReplyDTO FromResult(string orderId, OrderStatus status, string reason, string action, List<OrderDetailDTO> data)
     {
-        return new OrderReplyDTO(orderId, status, reason, action, data);
+        var idenpotencyId = Ulid.NewUlid().ToString();
+        return new OrderReplyDTO(orderId, status, reason, action, idenpotencyId, data);
     }
 }

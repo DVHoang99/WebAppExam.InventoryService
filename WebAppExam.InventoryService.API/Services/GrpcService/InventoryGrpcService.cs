@@ -23,13 +23,12 @@ public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
 
     public override async Task<CreateInventoryResponse> CreateInventory(CreateInventoryRequest request, ServerCallContext context)
     {
-        var inventoryDto = new WebAppExam.InventoryService.Application.Inventories.DTOs.InventoryDTO
-        {
-            ProductId = request.Inventory.ProductId,
-            StockQuantity = request.Inventory.StockQuantity,
-            CorrelationId = request.Inventory.CorrelationId,
-            WareHouseId = request.Inventory.WareHouseId
-        };
+        var inventoryDto = Application.Inventories.DTOs.InventoryDTO.FromResult(
+            request.Inventory.ProductId,
+            request.Inventory.StockQuantity,
+            request.Inventory.CorrelationId,
+            request.Inventory.WareHouseId
+        );
 
         var command = new CreateInventoryCommand(inventoryDto);
         var result = await _mediator.Send(command, context.CancellationToken);

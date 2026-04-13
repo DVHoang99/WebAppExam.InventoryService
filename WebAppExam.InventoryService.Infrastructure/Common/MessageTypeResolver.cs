@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using KafkaFlow;
 using KafkaFlow.Middlewares.Serializer.Resolvers;
 using WebAppExam.InventoryService.Infrastructure.Consumers;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsumer;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderUpdatedConsumer;
+using WebAppExam.InventoryService.Infrastructure.Constants;
 
-namespace WebAppExam.InventoryService.API.Common;
+namespace WebAppExam.InventoryService.Infrastructure.Common;
 
 public class MessageTypeResolver : IMessageTypeResolver
 {
@@ -19,17 +22,17 @@ public class MessageTypeResolver : IMessageTypeResolver
     };
     public ValueTask<Type?> OnConsumeAsync(IMessageContext context)
     {
-        var typeName = context.Headers.GetString("Message-Type");
+        var typeName = context.Headers.GetString(MessageConstants.MessageTypeHeader);
 
-        Console.WriteLine($"[Kafka-Resolver] Đang phiên dịch Type: '{typeName}'");
+        Console.WriteLine($"[Kafka-Resolver] Resolving Type: '{typeName}'");
 
         if (typeName != null && _types.TryGetValue(typeName, out var type))
         {
-            Console.WriteLine($"[Kafka-Resolver] Đã tìm thấy map cho: {type.Name}");
+            Console.WriteLine($"[Kafka-Resolver] Found map for: {type.Name}");
             return ValueTask.FromResult<Type?>(type);
         }
 
-        Console.WriteLine($"[Kafka-Resolver] KHÔNG TÌM THẤY MAP CHO: '{typeName}'");
+        Console.WriteLine($"[Kafka-Resolver] MAP NOT FOUND FOR: '{typeName}'");
         return ValueTask.FromResult<Type?>(null);
     }
 
@@ -38,12 +41,15 @@ public class MessageTypeResolver : IMessageTypeResolver
         var type = context.Message.GetType();
         string alias = type.FullName!;
 
-        // Nếu là 2 class này thì gán tên ngắn
-        if (type == typeof(OrderCreatedEvent)) alias = "OrderCreated";
-        else if (type == typeof(OrderUpdatedEvent)) alias = "OrderUpdated";
+        // If it is one of these 2 classes, assign a short name
+        if (type == typeof(OrderCreatedEvent)) alias = MessageConstants.OrderCreatedType;
+        else if (type == typeof(OrderUpdatedEvent)) alias = MessageConstants.OrderUpdatedType;
+        else if (type == typeof(OrderCanceledEvent)) alias = MessageConstants.OrderCanceledType;
+        else if (type == typeof(OrderDeletedEvent)) alias = MessageConstants.OrderDeletedType;
 
-        // Ghi vào Header
-        context.Headers.Add("Message-Type", System.Text.Encoding.UTF8.GetBytes(alias));
+
+        // Write to Header
+        context.Headers.Add(MessageConstants.MessageTypeHeader, System.Text.Encoding.UTF8.GetBytes(alias));
 
         return ValueTask.CompletedTask;
     }

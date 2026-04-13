@@ -17,26 +17,22 @@ public class UpdateInventoryCommandHandler : IRequestHandler<UpdateInventoryComm
     public async Task<bool> Handle(UpdateInventoryCommand request, CancellationToken cancellationToken)
     {
         var inventory = await _repository.GetInventoryByProductIdAndWarehouseIdAsync(
-        request.Id,
-        request.WareHouseId,
-        cancellationToken);
+            request.Id,
+            request.WareHouseId,
+            cancellationToken);
 
         if (inventory == null)
         {
             throw new Exception("Inventory not found");
         }
 
-        if (inventory.ProcessedUpdateIds != null &&
-            inventory.ProcessedUpdateIds.Contains(request.UpdateEventId))
+        if (inventory.ProcessedUpdateIds.Contains(request.UpdateEventId))
         {
             return true;
         }
 
         inventory.OverrideStock(request.NewStockQuantity);
-        inventory.CreatedAt = DateTime.UtcNow;
-
-        inventory.ProcessedUpdateIds ??= new List<string>();
-        inventory.ProcessedUpdateIds.Add(request.UpdateEventId);
+        inventory.AddProcessedUpdate(request.UpdateEventId);
 
         await _repository.UpdateAsync(inventory, cancellationToken);
 

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using WebAppExam.InventoryService.API.Common;
+using WebAppExam.InventoryService.Infrastructure.Common;
 using WebAppExam.InventoryService.Infrastructure.Constants;
 using WebAppExam.InventoryService.Infrastructure.Consumers;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer;
@@ -58,33 +58,35 @@ public static class DependencyInjection
                             .WithHandlerLifetime(InstanceLifetime.Scoped)
                             .AddHandler<OrderCreatedConsumer>()
                             .AddHandler<OrderUpdatedConsumer>()
+                            .AddHandler<OrderDeletedConsumer>()
+                            .AddHandler<OrderCanceledConsumer>()
                         )
                     )
                 )
-                .AddConsumer(consumer => consumer
-                    .Topic(KafkaTopics.OrderDeletedTopic)
-                    .WithGroupId(KafkaConsumerGroups.InventoryOrderDeletedGroup)
-                    .WithWorkersCount(KafkaSettings.ConsumerWorkersCount)
-                    .WithBufferSize(KafkaSettings.ConsumerBufferSize)
-                    .AddMiddlewares(middlewares => middlewares
-                        .AddSingleTypeDeserializer<OrderDeletedEvent, JsonCoreDeserializer>()
-                        .AddTypedHandlers(h => h
-                            .WithHandlerLifetime(InstanceLifetime.Scoped)
-                            .AddHandler<OrderDeletedConsumer>())
-                    )
-                )
-                .AddConsumer(consumer => consumer
-                    .Topic(KafkaTopics.OrderCanceledTopic)
-                    .WithGroupId(KafkaConsumerGroups.InventoryOrderCanceledGroup)
-                    .WithWorkersCount(KafkaSettings.ConsumerWorkersCount)
-                    .WithBufferSize(KafkaSettings.ConsumerBufferSize)
-                    .AddMiddlewares(middlewares => middlewares
-                        .AddSingleTypeDeserializer<OrderCanceledEvent, JsonCoreDeserializer>()
-                        .AddTypedHandlers(h => h
-                            .WithHandlerLifetime(InstanceLifetime.Scoped)
-                            .AddHandler<OrderCanceledConsumer>())
-                    )
-                )
+                // .AddConsumer(consumer => consumer
+                //     .Topic(KafkaTopics.OrderDeletedTopic)
+                //     .WithGroupId(KafkaConsumerGroups.InventoryOrderDeletedGroup)
+                //     .WithWorkersCount(KafkaSettings.ConsumerWorkersCount)
+                //     .WithBufferSize(KafkaSettings.ConsumerBufferSize)
+                //     .AddMiddlewares(middlewares => middlewares
+                //         .AddSingleTypeDeserializer<OrderDeletedEvent, JsonCoreDeserializer>()
+                //         .AddTypedHandlers(h => h
+                //             .WithHandlerLifetime(InstanceLifetime.Scoped)
+                //             .AddHandler<OrderDeletedConsumer>())
+                //     )
+                // )
+                // .AddConsumer(consumer => consumer
+                //     .Topic(KafkaTopics.OrderCanceledTopic)
+                //     .WithGroupId(KafkaConsumerGroups.InventoryOrderCanceledGroup)
+                //     .WithWorkersCount(KafkaSettings.ConsumerWorkersCount)
+                //     .WithBufferSize(KafkaSettings.ConsumerBufferSize)
+                //     .AddMiddlewares(middlewares => middlewares
+                //         .AddSingleTypeDeserializer<OrderCanceledEvent, JsonCoreDeserializer>()
+                //         .AddTypedHandlers(h => h
+                //             .WithHandlerLifetime(InstanceLifetime.Scoped)
+                //             .AddHandler<OrderCanceledConsumer>())
+                //     )
+                // )
             )
         );
 
@@ -119,9 +121,9 @@ public static class DependencyInjection
 
                     if (httpContext.User.Identity?.IsAuthenticated == true) return true;
 
-                    if (httpContext.Request.Headers.TryGetValue("X-Internal-Key", out var extractedKey))
+                    if (httpContext.Request.Headers.TryGetValue(CommonConstants.InternalKeyHeader, out var extractedKey))
                     {
-                        var secretKey = configuration["InternalSettings:ApiKey"];
+                        var secretKey = configuration[CommonConstants.InternalApiKeyConfigPath];
                         return !string.IsNullOrEmpty(secretKey) && extractedKey == secretKey;
                     }
 

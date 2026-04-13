@@ -7,6 +7,9 @@ using WebAppExam.InventoryService.API.Services.Grpc;
 using WebAppExam.InventoryService.Application;
 using WebAppExam.InventoryService.Infrastructure;
 using Serilog;
+using Hangfire;
+using Hangfire.States;
+using WebAppExam.InventoryService.Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +35,13 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Setup Hangfire Dashboard (Monitoring only)
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new Hangfire.Dashboard.LocalRequestsOnlyAuthorizationFilter() }
+});
+
 var kafkaBus = app.Services.CreateKafkaBus();
 await kafkaBus.StartAsync();
 

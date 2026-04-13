@@ -9,6 +9,10 @@ using WebAppExam.InventoryService.Infrastructure.Constants;
 using WebAppExam.InventoryService.Infrastructure.Repositories;
 using WebAppExam.InventoryService.Infrastructure.Services;
 using InventoryService = WebAppExam.InventoryService.Infrastructure.Services.InventoryService;
+using Hangfire;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
+using Hangfire.Mongo.Migration.Strategies.Backup;
 
 namespace WebAppExam.InventoryService.Infrastructure;
 
@@ -30,6 +34,23 @@ public static class DependencyInjection
             return client.GetDatabase(databaseName);
         });
 
+        // Configure Hangfire storage (for Dashboard in API)
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseMongoStorage(connectionString, databaseName, new MongoStorageOptions
+            {
+                MigrationOptions = new MongoMigrationOptions
+                {
+                    MigrationStrategy = new MigrateMongoMigrationStrategy(),
+                    BackupStrategy = new CollectionMongoBackupStrategy()
+                },
+                Prefix = "hangfire",
+                CheckConnection = true
+            })
+        );
+
         // Configure Redis
         var redisConfig = configuration.GetSection("Redis")["Configuration"] ?? DatabaseSettings.DefaultRedisConnection;
 
@@ -46,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<IWareHouseRepository, WareHouseRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
         services.AddScoped<IInboxRepository, InboxRepository>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
 
         // Register Services
         services.AddScoped<ICacheLockService, CacheLockService>();

@@ -8,6 +8,8 @@ using WebAppExam.InventoryService.Domain.Enum;
 using WebAppExam.InventoryService.Domain.Entity;
 using WebAppExam.InventoryService.Application.Repositories;
 using Microsoft.Extensions.Logging;
+using WebAppExam.InventoryService.Infrastructure.Constants;
+using WebAppExam.InventoryService.Domain.Exceptions;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers;
 
@@ -40,16 +42,16 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
     {
         var idempotencyId = message.IdempotencyId;
         var lockToken = Guid.NewGuid().ToString();
-        var lockKey = $"lock:idempotency:{idempotencyId}";
+        var lockKey = $"{CacheKeys.IdempotencyLockPrefix}{idempotencyId}";
 
         var acquiredLocks = await _cacheLockService.AcquireMultipleLocksAsync(
             new[] { lockKey },
             lockToken,
-            TimeSpan.FromSeconds(30));
+            TimeSpan.FromSeconds(CommonConstants.LockTimeoutSeconds));
 
         if (!acquiredLocks.Any())
         {
-            _logger.LogWarning("Message {Id} đang được xử lý bởi worker khác.", idempotencyId);
+            _logger.LogWarning("Message {Id} is being processed by another worker.", idempotencyId);
             return;
         }
 
@@ -59,7 +61,7 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
             var alreadyProcessed = await _inboxRepository.ExistsAsync(idempotencyId, nameof(OrderCreatedConsumer));
             if (alreadyProcessed)
             {
-                _logger.LogInformation("Message {Id} đã được xử lý thành công trước đó.", idempotencyId);
+                _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
                 return;
             }
 
@@ -79,11 +81,17 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
                     await _inboxRepository.CreateAsync(InboxMessage.Init(idempotencyId, message.OrderId, nameof(OrderCreatedConsumer)));
                 }
 
+                if(!stockResult.IsSuccess)
+                {
+                    throw new InsufficientStockException("1", 1, 1);
+                }
+
                 await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
             }
         }
         catch (Exception ex)
         {
+            
             _logger.LogError(ex, "[Error] - Inventory Handler: OrderId {OrderId}, IdempotencyId {Id}", message.OrderId, idempotencyId);
 
             var input = message.Items?.Select(x => new OrderItemDTO
@@ -93,9 +101,9 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
                 WareHouseId = x.WareHouseId
             }).ToList() ?? new List<OrderItemDTO>();
 
-            await SendMessageReply(message, false, "Lỗi hệ thống nội bộ Inventory", input);
+            await SendMessageReply(message, false, MessageConstants.InternalServerErrorMessage, input);
             
-            // Throw lỗi để KafkaFlow thực hiện Retry (nếu có config)
+            // Throw error for KafkaFlow to perform Retry (if configured)
             throw;
         }
         finally
@@ -110,7 +118,7 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
         var orderReply = OrderReplyDTO.FromResult(
                message.OrderId,
                isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
-               reason, "created", [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
+               reason, MessageConstants.ReplyCreatedType, [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
 
         await _orderService.SendMessageReply(orderReply, isSuccess, reason);
     }

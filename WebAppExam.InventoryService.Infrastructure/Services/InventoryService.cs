@@ -1,8 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using MongoDB.Driver;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
 using WebAppExam.InventoryService.Application.Repositories;
+using WebAppExam.InventoryService.Domain.Exceptions;
 
 namespace WebAppExam.InventoryService.Infrastructure.Services;
 
@@ -24,42 +29,39 @@ public class InventoryService : IInventoryService
         if (items == null || !items.Any())
             return (true, string.Empty);
 
-        var requiredStocks = items
-            .GroupBy(x => new { ProductId = Ulid.Parse(x.ProductId), WarehouseId = Ulid.Parse(x.WareHouseId) })
-            .Select(g => new
-            {
-                g.Key.ProductId,
-                g.Key.WarehouseId,
-                TotalRequired = g.Sum(x => x.Quantity),
-                RawProductIdStr = g.First().ProductId
-            })
-            .ToList();
-
-        var keysToFetch = requiredStocks.Select(x => (x.ProductId, x.WarehouseId)).ToList();
-
-        // 1. Lấy stock - Truyền session để đảm bảo đọc dữ liệu nhất quán trong transaction
-        var stockDict = await _inventoryRepo.GetStocksBulkAsync(keysToFetch);
-
-        foreach (var req in requiredStocks)
+        try
         {
-            var key = (req.ProductId, req.WarehouseId);
-
-            if (!stockDict.TryGetValue(key, out var currentStock) || currentStock < req.TotalRequired)
+            // 1. Process items
+            foreach (var item in items)
             {
-                return (false, $"Sản phẩm {req.RawProductIdStr} không đủ số lượng.");
+                var inventory = await _inventoryRepo.GetInventoryByProductIdAndWarehouseIdAsync(item.ProductId, item.WareHouseId);
+                
+                if (inventory == null)
+                {
+                    return (false, $"Inventory not found for product {item.ProductId} in warehouse {item.WareHouseId}");
+                }
+
+                // Call Domain logic
+                inventory.DeductStock(item.Quantity);
+
+                // Persist changes
+                await _inventoryRepo.UpdateAsync(inventory);
             }
-        }
 
-        // 2. Trừ kho - Truyền session để việc trừ kho nằm trong transaction
-        foreach (var item in items)
+            return (true, string.Empty);
+        }
+        catch (InsufficientStockException ex)
         {
-            await _inventoryRepo.DeductStockAsync(
-                Ulid.Parse(item.ProductId),
-                Ulid.Parse(item.WareHouseId),
-                item.Quantity);
+            return (false, ex.Message);
         }
-
-        return (true, string.Empty);
+        catch (DomainException ex)
+        {
+            return (false, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return (false, "An unexpected error occurred during inventory deduction.");
+        }
     }
 
     public async Task<List<GetBatchInventoryDTO>> GetBatchInventoryDTOsByIdsAnsyc(List<string> ids, CancellationToken cancellationToken)

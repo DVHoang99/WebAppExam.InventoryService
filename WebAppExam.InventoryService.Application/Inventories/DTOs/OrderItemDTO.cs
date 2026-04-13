@@ -4,7 +4,7 @@ namespace WebAppExam.InventoryService.Application.Inventories.DTOs;
 
 public class OrderItemDTO
 {
-    public string ProductId { get; set; }
-    public int Quantity { get; set; }
-    public string WareHouseId { get; set; }
+    public required string ProductId { get; init; }
+    public int Quantity { get; init; }
+    public required string WareHouseId { get; init; }
 }

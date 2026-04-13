@@ -11,14 +11,16 @@ public class InventoryDTO
     public string CorrelationId { get; set; }
     public string WareHouseId { get; set; }
 
-    public static InventoryDTO FromResult(Inventory inventory)
+    private InventoryDTO(string productId, int stockQuantity, string correlationId, string wareHouseId)
     {
-        return new InventoryDTO()
-        {
-            ProductId = inventory.ProductId,
-            StockQuantity = inventory.StockQuantity,
-            WareHouseId = inventory.WareHouseId,
-            CorrelationId = inventory.CorrelationId
-        };
+        ProductId = productId;
+        StockQuantity = stockQuantity;
+        CorrelationId = correlationId;
+        WareHouseId = wareHouseId;
+    }
+
+    public static InventoryDTO FromResult(string productId, int stockQuantity, string correlationId, string wareHouseId)
+    {
+        return new InventoryDTO(productId, stockQuantity, correlationId, wareHouseId);
     }
 }

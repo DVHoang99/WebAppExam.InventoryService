@@ -8,6 +8,7 @@ using WebAppExam.InventoryService.Domain.Enum;
 using WebAppExam.InventoryService.Domain.Entity;
 using WebAppExam.InventoryService.Application.Repositories;
 using Microsoft.Extensions.Logging;
+using WebAppExam.InventoryService.Infrastructure.Constants;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer;
 
@@ -40,16 +41,16 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
     {
         var idempotencyId = message.IdempotencyId;
         var lockToken = Guid.NewGuid().ToString();
-        var lockKey = $"lock:idempotency:{idempotencyId}";
+        var lockKey = $"{CacheKeys.IdempotencyLockPrefix}{idempotencyId}";
 
         var acquiredLocks = await _cacheLockService.AcquireMultipleLocksAsync(
             new[] { lockKey },
             lockToken,
-            TimeSpan.FromSeconds(30));
+            TimeSpan.FromSeconds(CommonConstants.LockTimeoutSeconds));
 
         if (!acquiredLocks.Any())
         {
-            _logger.LogWarning("Message {Id} đang được xử lý bởi worker khác.", idempotencyId);
+            _logger.LogWarning("Message {Id} is being processed by another worker.", idempotencyId);
             return;
         }
 
@@ -58,7 +59,7 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
             var alreadyProcessed = await _inboxRepository.ExistsAsync(idempotencyId, nameof(OrderCanceledConsumer));
             if (alreadyProcessed)
             {
-                _logger.LogInformation("Message {Id} đã được xử lý thành công trước đó.", idempotencyId);
+                _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
                 return;
             }
 
@@ -92,7 +93,7 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
                 WareHouseId = x.WareHouseId
             }).ToList() ?? new List<OrderItemDTO>();
 
-            await SendMessageReply(message, false, "Lỗi hệ thống nội bộ Inventory", input);
+            await SendMessageReply(message, false, MessageConstants.InternalServerErrorMessage, input);
             
             throw;
         }
@@ -107,7 +108,7 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
         var orderReply = OrderReplyDTO.FromResult(
                message.OrderId,
                isSuccess ? message.Status : OrderStatus.Failed,
-               reason, "canceled", [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
+               reason, MessageConstants.ReplyCanceledType, [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
 
         await _orderService.SendMessageReply(orderReply, isSuccess, reason);
     }

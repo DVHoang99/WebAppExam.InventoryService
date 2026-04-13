@@ -18,10 +18,11 @@ public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuer
     {
         var res = await _inventoryRepository.GetByIdAsync(request.Id, cancellationToken);
 
-        return new InventoryDTO
-        {
-            ProductId = res.ProductId,
-            StockQuantity = res.StockQuantity,
-        };
+        return InventoryDTO.FromResult(
+            res.ProductId,
+            res.StockQuantity,
+            res.CorrelationId,
+            res.WareHouseId
+        );
     }
 }

@@ -3,4 +3,5 @@
   <Project Path="WebAppExam.InventoryService.Application/WebAppExam.InventoryService.Application.csproj" />
   <Project Path="WebAppExam.InventoryService.Domain/WebAppExam.InventoryService.Domain.csproj" />
   <Project Path="WebAppExam.InventoryService.Infrastructure/WebAppExam.InventoryService.Infrastructure.csproj" />
+  <Project Path="WebAppExam.InventoryService.BackgroundJob/WebAppExam.InventoryService.BackgroundJob.csproj" />
 </Solution>
