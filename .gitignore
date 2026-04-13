@@ -491,3 +491,10 @@ redis_data/
 .vs/
 .idea/
 *.user
+
+# Ignore log folders
+logs/
+Logs/
+log/
+Log/
+*.log
