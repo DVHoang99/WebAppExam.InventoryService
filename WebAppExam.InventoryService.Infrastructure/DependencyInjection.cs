@@ -11,6 +11,10 @@ using WebAppExam.InventoryService.Infrastructure.Services;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
 using WebAppExam.InventoryService.Infrastructure.Persistence;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
+using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 namespace WebAppExam.InventoryService.Infrastructure;
 
@@ -35,14 +39,31 @@ public static class DependencyInjection
         // Configure Redis
         var redisConfig = configuration.GetSection("Redis")["Configuration"] ?? DatabaseSettings.DefaultRedisConnection;
 
-        services.AddSingleton<IConnectionMultiplexer>(
-            ConnectionMultiplexer.Connect(redisConfig)
-        );
+        var redisConnection = ConnectionMultiplexer.Connect(redisConfig);
+        services.AddSingleton<IConnectionMultiplexer>(redisConnection);
 
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = redisConfig;
         });
+
+        // Configure FusionCache (L1 + L2 + Backplane)
+        services.AddFusionCache()
+            .WithDefaultEntryOptions(new FusionCacheEntryOptions
+            {
+                Duration = TimeSpan.FromMinutes(10),
+                DistributedCacheDuration = TimeSpan.FromHours(2),
+                JitterMaxDuration = TimeSpan.FromSeconds(30)
+            })
+            .WithSerializer(new FusionCacheNewtonsoftJsonSerializer())
+            .WithBackplane(new RedisBackplane(new RedisBackplaneOptions
+            {
+                Configuration = redisConfig
+            }))
+            .WithDistributedCache(new RedisCache(new RedisCacheOptions
+            {
+                Configuration = redisConfig
+            }));
 
         // Configure Hangfire storage (using Redis)
         services.AddHangfire(config => config
@@ -64,6 +85,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, MongoUnitOfWork>();
 
         // Register Services
+        services.AddSingleton<ICacheService, FusionCacheService>();
         services.AddScoped<ICacheLockService, CacheLockService>();
         services.AddScoped<IIdempotencyService, RedisIdempotencyService>();
         services.AddScoped<IInventoryService, Services.InventoryService>();

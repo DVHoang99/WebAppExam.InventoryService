@@ -1,2 +1,0 @@
-obj\Debug\net10.0\Protos/Warehouses.cs \
-obj\Debug\net10.0\Protos/WarehousesGrpc.cs: Protos/Warehouses.proto

@@ -107,6 +107,8 @@ public static class DependencyInjection
             )
         );
 
+        var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is missing from configuration.");
+
         // Configure JWT Authentication
         services.AddAuthentication(options =>
         {
@@ -122,7 +124,7 @@ public static class DependencyInjection
                 ValidateAudience = true,
                 ValidAudience = configuration["Jwt:Audience"],
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
             };
         });
 
