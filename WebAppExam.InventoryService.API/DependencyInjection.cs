@@ -1,5 +1,6 @@
 using KafkaFlow;
 using KafkaFlow.Serializer;
+using KafkaFlow.Retry;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +11,10 @@ using WebAppExam.InventoryService.Infrastructure.Consumers;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsumer;
 using WebAppExam.InventoryService.Infrastructure.Consumers.OrderUpdatedConsumer;
+using WebAppExam.InventoryService.Domain.Exceptions;
+using MongoDB.Driver;
+using Confluent.Kafka;
+using StackExchange.Redis;
 
 namespace WebAppExam.InventoryService.API;
 
@@ -54,6 +59,18 @@ public static class DependencyInjection
                     .WithBufferSize(KafkaSettings.ConsumerBufferSize)
                     .AddMiddlewares(middlewares => middlewares
                         .AddDeserializer<JsonCoreDeserializer, MessageTypeResolver>()
+                        .RetrySimple(retry => retry
+                            .Handle<DatabaseOperationException>()
+                            .Handle<MongoException>()
+                            .Handle<KafkaException>()
+                            .Handle<RedisException>()
+                            .Handle<RedisTimeoutException>()
+                            .Handle<RedisConnectionException>()
+                            .TryTimes(3)
+                            .WithTimeBetweenTriesPlan((retryCount) =>
+                                TimeSpan.FromMinutes(5)
+                            )
+                        )
                         .AddTypedHandlers(h => h
                             .WithHandlerLifetime(InstanceLifetime.Scoped)
                             .AddHandler<OrderCreatedConsumer>()

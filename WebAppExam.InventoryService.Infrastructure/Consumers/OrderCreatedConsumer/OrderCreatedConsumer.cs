@@ -6,10 +6,11 @@ using WebAppExam.InventoryService.Application.Orders.DTOs;
 using WebAppExam.InventoryService.Application.Orders.Services;
 using WebAppExam.InventoryService.Domain.Enum;
 using WebAppExam.InventoryService.Domain.Entity;
-using WebAppExam.InventoryService.Application.Repositories;
 using Microsoft.Extensions.Logging;
 using WebAppExam.InventoryService.Infrastructure.Constants;
 using WebAppExam.InventoryService.Domain.Exceptions;
+using StackExchange.Redis;
+using Confluent.Kafka;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers;
 
@@ -18,23 +19,23 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
     private readonly IInventoryService _inventoryService;
     private readonly IOrderService _orderService;
     private readonly ICacheLockService _cacheLockService;
-    private readonly IMongoClient _mongoClient;
-    private readonly IInboxRepository _inboxRepository;
+    private readonly IIdempotencyService _idempotencyService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<OrderCreatedConsumer> _logger;
 
     public OrderCreatedConsumer(
         IInventoryService inventoryService,
         IOrderService orderService,
         ICacheLockService cacheLockService,
-        IMongoClient mongoClient,
-        IInboxRepository inboxRepository,
+        IIdempotencyService idempotencyService,
+        IUnitOfWork unitOfWork,
         ILogger<OrderCreatedConsumer> logger)
     {
         _inventoryService = inventoryService;
         _orderService = orderService;
         _cacheLockService = cacheLockService;
-        _mongoClient = mongoClient;
-        _inboxRepository = inboxRepository;
+        _idempotencyService = idempotencyService;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -55,13 +56,16 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
             return;
         }
 
+        using var uow = _unitOfWork;
+        await _unitOfWork.StartTransactionAsync();
 
         try
         {
-            var alreadyProcessed = await _inboxRepository.ExistsAsync(idempotencyId, nameof(OrderCreatedConsumer));
+            var alreadyProcessed = await _idempotencyService.IsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
             if (alreadyProcessed)
             {
                 _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
+                await _unitOfWork.RollbackAsync();
                 return;
             }
 
@@ -78,39 +82,51 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
 
                 if (stockResult.IsSuccess)
                 {
-                    await _inboxRepository.CreateAsync(InboxMessage.Init(idempotencyId, message.OrderId, nameof(OrderCreatedConsumer)));
+                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
+                    await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
+                    await _unitOfWork.CommitAsync();
                 }
-
-                if(!stockResult.IsSuccess)
+                else
                 {
-                    throw new InsufficientStockException("1", 1, 1);
+                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
+                    await SendMessageReply(message, false, stockResult.FailReason, input);
+                    await _unitOfWork.CommitAsync();
                 }
-
-                await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
             }
+            else
+            {
+                 await _unitOfWork.RollbackAsync();
+            }
+        }
+        catch (Exception ex) when (ex is RedisException || ex is RedisTimeoutException || ex is RedisConnectionException)
+        {
+            await RollbackAndThrow(ex, "Redis error during inventory processing", idempotencyId, message.OrderId);
+        }
+        catch (MongoException ex)
+        {
+            await RollbackAndThrow(ex, "MongoDB error during inventory processing", idempotencyId, message.OrderId);
+        }
+        catch (KafkaException ex)
+        {
+            await RollbackAndThrow(ex, "Kafka error during inventory processing", idempotencyId, message.OrderId);
         }
         catch (Exception ex)
         {
-            
+            await _unitOfWork.RollbackAsync();
             _logger.LogError(ex, "[Error] - Inventory Handler: OrderId {OrderId}, IdempotencyId {Id}", message.OrderId, idempotencyId);
-
-            var input = message.Items?.Select(x => new OrderItemDTO
-            {
-                ProductId = x.ProductId,
-                Quantity = x.Quantity,
-                WareHouseId = x.WareHouseId
-            }).ToList() ?? new List<OrderItemDTO>();
-
-            await SendMessageReply(message, false, MessageConstants.InternalServerErrorMessage, input);
-            
-            // Throw error for KafkaFlow to perform Retry (if configured)
             throw;
         }
         finally
         {
-            // 8. RELEASE REDIS LOCK
             await _cacheLockService.ReleaseMultipleLocksAsync(acquiredLocks, lockToken);
         }
+    }
+
+    private async Task RollbackAndThrow(Exception ex, string customMessage, string idempotencyId, string orderId)
+    {
+        try { await _unitOfWork.RollbackAsync(); } catch { }
+        _logger.LogError(ex, "[Infrastructure Error] - {Message}: OrderId {OrderId}, IdempotencyId {Id}", customMessage, orderId, idempotencyId);
+        throw new DatabaseOperationException(customMessage, ex);
     }
 
     private async Task SendMessageReply(OrderCreatedEvent message, bool isSuccess, string reason, List<OrderItemDTO> input)

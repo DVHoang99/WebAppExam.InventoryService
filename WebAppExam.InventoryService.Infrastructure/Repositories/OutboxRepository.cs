@@ -5,19 +5,35 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using WebAppExam.InventoryService.Application.Repositories;
 using WebAppExam.InventoryService.Domain.Entity;
+using WebAppExam.InventoryService.Infrastructure.Persistence;
 
 namespace WebAppExam.InventoryService.Infrastructure.Repositories;
 
-public class OutboxRepository(IMongoDatabase database) : BaseRepository<OutboxMessage>(database, "OutboxMessages"), IOutboxRepository
+public class OutboxRepository : BaseRepository<OutboxMessage>, IOutboxRepository
 {
+    public OutboxRepository(IMongoDatabase database, IMongoSessionProvider sessionProvider) 
+        : base(database, "OutboxMessages", sessionProvider)
+    {
+    }
+
     public async Task CreateAsync(OutboxMessage message, CancellationToken cancellationToken = default)
     {
-        await _collection.InsertOneAsync(message, cancellationToken: cancellationToken);
+        await AddAsync(message, cancellationToken);
     }
 
     public async Task<List<OutboxMessage>> GetUnprocessedMessagesAsync(int batchSize, CancellationToken cancellationToken = default)
     {
         var filter = Builders<OutboxMessage>.Filter.Eq(x => x.IsProcessed, false);
+        var session = _sessionProvider.CurrentSession;
+        
+        if (session != null)
+        {
+            return await _collection.Find(session, filter)
+                .SortBy(x => x.CreatedAt)
+                .Limit(batchSize)
+                .ToListAsync(cancellationToken);
+        }
+
         return await _collection.Find(filter)
             .SortBy(x => x.CreatedAt)
             .Limit(batchSize)
@@ -31,6 +47,10 @@ public class OutboxRepository(IMongoDatabase database) : BaseRepository<OutboxMe
             .Set(x => x.IsProcessed, true)
             .Set(x => x.ProcessedAt, DateTime.UtcNow);
 
-        await _collection.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+        var session = _sessionProvider.CurrentSession;
+        if (session != null)
+            await _collection.UpdateOneAsync(session, filter, update, cancellationToken: cancellationToken);
+        else
+            await _collection.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
     }
 }

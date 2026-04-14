@@ -1,13 +1,7 @@
 using Hangfire;
-using Hangfire.Mongo;
-using Hangfire.Mongo.Migration.Strategies;
-using Hangfire.Mongo.Migration.Strategies.Backup;
-using Hangfire.States;
+using Hangfire.Redis.StackExchange;
 using KafkaFlow;
 using KafkaFlow.Serializer;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using MongoDB.Driver;
 using WebAppExam.InventoryService.Application;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Infrastructure;
@@ -24,23 +18,17 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 // Overide Job registration to use local implementation
 builder.Services.AddScoped<IOutboxPublisherJob, OutboxPublisherJob>();
 
-// Re-configure Hangfire Server in this service
-var connectionString = builder.Configuration.GetSection("MongoDbSettings")["ConnectionString"];
-var databaseName = builder.Configuration.GetSection("MongoDbSettings")["DatabaseName"];
+// Configure Redis connection for Hangfire
+var redisConfig = builder.Configuration.GetSection("Redis")["Configuration"] ?? DatabaseSettings.DefaultRedisConnection;
 
 builder.Services.AddHangfire(config => config
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseMongoStorage(connectionString, databaseName, new MongoStorageOptions
+    .UseRedisStorage(redisConfig, new RedisStorageOptions
     {
-        MigrationOptions = new MongoMigrationOptions
-        {
-            MigrationStrategy = new MigrateMongoMigrationStrategy(),
-            BackupStrategy = new CollectionMongoBackupStrategy()
-        },
-        Prefix = "hangfire",
-        CheckConnection = true
+        Prefix = "hangfire:inventory:",
+        Db = 0
     })
 );
 
@@ -91,12 +79,9 @@ using (var scope = host.Services.CreateScope())
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
     recurringJobManager.AddOrUpdate<IOutboxPublisherJob>(
         "outbox-publisher",
+        "inventory-outbox",
         job => job.ProcessOutboxMessagesAsync(),
-        "*/5 * * * * *",
-        new RecurringJobOptions
-        {
-            QueueName = "inventory-outbox"
-        });
+        "*/5 * * * * *");
 }
 
 await host.RunAsync();

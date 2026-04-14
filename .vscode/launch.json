@@ -1,0 +1,46 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug API",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build API",
+            "program": "${workspaceFolder}/WebAppExam.InventoryService.API/bin/Debug/net10.0/WebAppExam.InventoryService.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/WebAppExam.InventoryService.API",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "Debug BackgroundJob",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build BackgroundJob",
+            "program": "${workspaceFolder}/WebAppExam.InventoryService.BackgroundJob/bin/Debug/net10.0/WebAppExam.InventoryService.BackgroundJob.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/WebAppExam.InventoryService.BackgroundJob",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ENVIRONMENT": "Development"
+            },
+            "console": "internalConsole"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug All (API & BackgroundJob)",
+            "configurations": ["Debug API", "Debug BackgroundJob"]
+        }
+    ]
+}

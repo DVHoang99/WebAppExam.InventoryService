@@ -1,10 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\WebAppExam.InventoryService.Application\WebAppExam.InventoryService.Application.csproj" />
   </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Hangfire.Redis.StackExchange" Version="1.12.0" />
 		<PackageReference Include="KafkaFlow" Version="4.2.0" />
 		<PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="4.2.0" />
 		<PackageReference Include="KafkaFlow.Serializer.Json" Version="1.5.8" />
@@ -14,7 +15,6 @@
 		<PackageReference Include="MongoDB.Driver" Version="3.7.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.12.8" />
 		<PackageReference Include="Ulid" Version="1.4.1" />
-		<PackageReference Include="Hangfire.Mongo" Version="1.14.1" />
 		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
 	</ItemGroup>
 
