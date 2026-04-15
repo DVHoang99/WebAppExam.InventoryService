@@ -15,9 +15,9 @@ public static class DependencyInjection
         MongoMappingConfig.Configure();
 
         // 2. Register MongoDbContext as Singleton
-        var connectionString = configuration["MongoDbSettings:ConnectionString"];
-        var databaseName = configuration["MongoDbSettings:DatabaseName"];
-        
+        var connectionString = configuration["MongoDbSettings:ConnectionString"] ?? throw new InvalidOperationException("MongoDB connection string is not configured.");
+        var databaseName = configuration["MongoDbSettings:DatabaseName"] ?? throw new InvalidOperationException("MongoDB database name is not configured.");
+
         services.AddSingleton(new MongoDbContext(connectionString, databaseName));
 
         // 3. Register Repositories

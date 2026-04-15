@@ -23,6 +23,6 @@ public class RedisIdempotencyService : IIdempotencyService
     {
         var redisKey = $"{CacheKeys.IdempotencyPrefix}{key}";
         var ttl = expiry ?? TimeSpan.FromDays(CommonConstants.IdempotencyTtlDays);
-        await _redisDb.StringSetAsync(redisKey, "1", ttl);
+        await _redisDb.StringSetAsync(redisKey, "Processed", ttl);
     }
 }
