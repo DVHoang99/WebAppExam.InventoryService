@@ -19,6 +19,7 @@ public class MessageTypeResolver : IMessageTypeResolver
         { nameof(OrderUpdatedEvent), typeof(OrderUpdatedEvent) },
         { nameof(OrderDeletedEvent), typeof(OrderDeletedEvent) },
         { nameof(OrderCanceledEvent), typeof(OrderCanceledEvent) },
+        { nameof(OutboxPointer), typeof(OutboxPointer) },
     };
     public ValueTask<Type?> OnConsumeAsync(IMessageContext context)
     {
@@ -46,6 +47,7 @@ public class MessageTypeResolver : IMessageTypeResolver
         else if (type == typeof(OrderUpdatedEvent)) alias = MessageConstants.OrderUpdatedType;
         else if (type == typeof(OrderCanceledEvent)) alias = MessageConstants.OrderCanceledType;
         else if (type == typeof(OrderDeletedEvent)) alias = MessageConstants.OrderDeletedType;
+        else if (type == typeof(OutboxPointer)) alias = MessageConstants.OutboxPointerType;
 
 
         // Write to Header

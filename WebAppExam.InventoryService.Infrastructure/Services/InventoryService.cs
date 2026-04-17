@@ -24,29 +24,26 @@ public class InventoryService : IInventoryService
     }
 
     public async Task<(bool IsSuccess, string FailReason)> CheckAndDeductInventoryAsync(
-    IEnumerable<OrderItemDTO> items)
+    OrderItemDTO item)
     {
-        if (items == null || !items.Any())
-            return (true, string.Empty);
+        if (item == null)
+            return (false, "Invalid order item.");
 
         try
         {
             // 1. Process items
-            foreach (var item in items)
+            var inventory = await _inventoryRepo.GetInventoryByProductIdAndWarehouseIdAsync(item.ProductId, item.WareHouseId);
+
+            if (inventory == null)
             {
-                var inventory = await _inventoryRepo.GetInventoryByProductIdAndWarehouseIdAsync(item.ProductId, item.WareHouseId);
-                
-                if (inventory == null)
-                {
-                    return (false, $"Inventory not found for product {item.ProductId} in warehouse {item.WareHouseId}");
-                }
-
-                // Call Domain logic
-                inventory.DeductStock(item.Quantity);
-
-                // Persist changes
-                await _inventoryRepo.UpdateAsync(inventory);
+                return (false, $"Inventory not found for product {item.ProductId} in warehouse {item.WareHouseId}");
             }
+
+            // Call Domain logic
+            inventory.DeductStock(item.Quantity);
+
+            // Persist changes
+            await _inventoryRepo.UpdateAsync(inventory);
 
             return (true, string.Empty);
         }

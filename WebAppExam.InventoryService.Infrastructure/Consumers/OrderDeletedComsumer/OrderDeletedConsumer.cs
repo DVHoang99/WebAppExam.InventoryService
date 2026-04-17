@@ -10,10 +10,13 @@ using WebAppExam.InventoryService.Infrastructure.Constants;
 using WebAppExam.InventoryService.Domain.Exceptions;
 using StackExchange.Redis;
 using Confluent.Kafka;
+using System.Text.Json;
+using WebAppExam.GrpcContracts.Protos;
+using WebAppExam.InventoryService.Infrastructure.Common;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderDeletedComsumer;
 
-public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
+public class OrderDeletedConsumer : IMessageHandler<OutboxPointer>
 {
     private readonly IInventoryService _inventoryService;
     private readonly IOrderService _orderService;
@@ -21,6 +24,7 @@ public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
     private readonly IIdempotencyService _idempotencyService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<OrderDeletedConsumer> _logger;
+    private readonly OutboxGrpc.OutboxGrpcClient _outboxClient;
 
     public OrderDeletedConsumer(
         IInventoryService inventoryService,
@@ -28,7 +32,8 @@ public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
         ICacheLockService cacheLockService,
         IIdempotencyService idempotencyService,
         IUnitOfWork unitOfWork,
-        ILogger<OrderDeletedConsumer> logger)
+        ILogger<OrderDeletedConsumer> logger,
+        OutboxGrpc.OutboxGrpcClient outboxClient)
     {
         _inventoryService = inventoryService;
         _orderService = orderService;
@@ -36,10 +41,23 @@ public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
         _idempotencyService = idempotencyService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _outboxClient = outboxClient;
     }
 
-    public async Task Handle(IMessageContext context, OrderDeletedEvent message)
+    public async Task Handle(IMessageContext context, OutboxPointer pointer)
     {
+        var response = await _outboxClient.GetOutboxMessageAsync(new OutboxMessageRequest { Id = pointer.Id });
+        var message = JsonSerializer.Deserialize<OrderDeletedEvent>(response.Content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (message == null)
+        {
+            _logger.LogError("Failed to deserialize OrderDeletedEvent for Outbox ID: {Id}", pointer.Id);
+            return;
+        }
+
         var idempotencyId = message.IdempotencyId;
         var lockToken = Guid.NewGuid().ToString();
         var lockKey = $"{CacheKeys.IdempotencyLockPrefix}{idempotencyId}";
@@ -55,47 +73,54 @@ public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
             return;
         }
 
-        using var uow = _unitOfWork;
         await _unitOfWork.StartTransactionAsync();
 
         try
         {
-            var alreadyProcessed = await _idempotencyService.IsProcessedAsync($"{nameof(OrderDeletedConsumer)}:{idempotencyId}");
-            if (alreadyProcessed)
-            {
-                _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
-                await _unitOfWork.RollbackAsync();
-                return;
-            }
+            // var alreadyProcessed = await _idempotencyService.IsProcessedAsync($"{nameof(OrderDeletedConsumer)}:{idempotencyId}");
+            // if (alreadyProcessed)
+            // {
+            //     _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
+            //     await _unitOfWork.RollbackAsync();
 
-            if (message.Items != null && message.Items.Any())
-            {
-                var input = message.Items.Select(x => new OrderItemDTO
-                {
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    WareHouseId = x.WareHouseId
-                }).ToList();
+            //     // Feedback: Idempotency hit is treated as success
+            //     await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 3 });
+            //     return;
+            // }
 
-                var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(input);
+            // if (message.Items != null && message.Items.Any())
+            // {
+            //     var input = message.Items.Select(x => new OrderItemDTO
+            //     {
+            //         ProductId = x.ProductId,
+            //         Quantity = x.Quantity,
+            //         WareHouseId = x.WareHouseId
+            //     }).ToList();
 
-                if (stockResult.IsSuccess)
-                {
-                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderDeletedConsumer)}:{idempotencyId}");
-                    await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
-                    await _unitOfWork.CommitAsync();
-                }
-                else
-                {
-                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderDeletedConsumer)}:{idempotencyId}");
-                    await SendMessageReply(message, false, stockResult.FailReason, input);
-                    await _unitOfWork.CommitAsync();
-                }
-            }
-            else
-            {
-                 await _unitOfWork.RollbackAsync();
-            }
+            //     var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(input);
+
+            //     if (stockResult.IsSuccess)
+            //     {
+            //         await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderDeletedConsumer)}:{idempotencyId}");
+            //         await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
+            //         await _unitOfWork.CommitAsync();
+            //     }
+            //     else
+            //     {
+            //         await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderDeletedConsumer)}:{idempotencyId}");
+            //         await SendMessageReply(message, false, stockResult.FailReason, input);
+            //         await _unitOfWork.CommitAsync();
+            //     }
+
+            //     // Feedback: Success
+            //     await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 3 });
+            // }
+            // else
+            // {
+            //      await _unitOfWork.RollbackAsync();
+            // }
+
+            await Task.CompletedTask;
         }
         catch (Exception ex) when (ex is RedisException || ex is RedisTimeoutException || ex is RedisConnectionException)
         {
@@ -113,6 +138,10 @@ public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
         {
             try { await _unitOfWork.RollbackAsync(); } catch { }
             _logger.LogError(ex, "[Error] - Inventory Handler: OrderId {OrderId}, IdempotencyId {Id}", message.OrderId, idempotencyId);
+
+            // Feedback: Failure
+            await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 2, Error = ex.Message });
+
             throw;
         }
         finally
@@ -128,12 +157,12 @@ public class OrderDeletedConsumer : IMessageHandler<OrderDeletedEvent>
         throw new DatabaseOperationException(customMessage, ex);
     }
 
-    private async Task SendMessageReply(OrderDeletedEvent message, bool isSuccess, string reason, List<OrderItemDTO> input)
+    private async Task SendMessageReply(OrderDeletedEvent message, bool isSuccess, string reason, OrderItemDTO input)
     {
         var orderReply = OrderReplyDTO.FromResult(
                message.OrderId,
                isSuccess ? OrderStatus.Cancel : OrderStatus.Failed,
-               reason, MessageConstants.ReplyDeletedType, [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
+               reason, MessageConstants.ReplyDeletedType, OrderDetailDTO.FromResult(input.ProductId, input.Quantity, 0, input.WareHouseId));
 
         await _orderService.SendMessageReply(orderReply, isSuccess, reason);
     }

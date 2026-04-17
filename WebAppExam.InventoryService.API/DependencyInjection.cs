@@ -15,6 +15,7 @@ using WebAppExam.InventoryService.Domain.Exceptions;
 using MongoDB.Driver;
 using Confluent.Kafka;
 using StackExchange.Redis;
+using WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventoryConsumer;
 
 namespace WebAppExam.InventoryService.API;
 
@@ -73,10 +74,10 @@ public static class DependencyInjection
                         )
                         .AddTypedHandlers(h => h
                             .WithHandlerLifetime(InstanceLifetime.Scoped)
-                            .AddHandler<OrderCreatedConsumer>()
-                            .AddHandler<OrderUpdatedConsumer>()
-                            .AddHandler<OrderDeletedConsumer>()
-                            .AddHandler<OrderCanceledConsumer>()
+                            .AddHandler<CalculateInventoryConsumer>()
+                            // .AddHandler<OrderUpdatedConsumer>()
+                            // .AddHandler<OrderDeletedConsumer>()
+                            // .AddHandler<OrderCanceledConsumer>()
                         )
                     )
                 )

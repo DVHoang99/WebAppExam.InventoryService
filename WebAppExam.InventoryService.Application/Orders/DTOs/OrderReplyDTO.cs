@@ -11,12 +11,12 @@ public class OrderReplyDTO
     public required string Reason { get; init; }
     public required string Action { get; init; }
     public string IdenpotencyId { get; init; }
-    public required List<OrderDetailDTO> Data { get; init; }
+    public required OrderDetailDTO Data { get; init; }
 
     public OrderReplyDTO() { }
 
     [SetsRequiredMembers]
-    private OrderReplyDTO(string orderId, OrderStatus status, string reason, string action, string idenpotencyId, List<OrderDetailDTO> data)
+    private OrderReplyDTO(string orderId, OrderStatus status, string reason, string action, string idenpotencyId, OrderDetailDTO data)
     {
         OrderId = orderId;
         Status = status;
@@ -27,7 +27,7 @@ public class OrderReplyDTO
     }
 
 
-    public static OrderReplyDTO FromResult(string orderId, OrderStatus status, string reason, string action, List<OrderDetailDTO> data)
+    public static OrderReplyDTO FromResult(string orderId, OrderStatus status, string reason, string action, OrderDetailDTO data)
     {
         var idenpotencyId = Ulid.NewUlid().ToString();
         return new OrderReplyDTO(orderId, status, reason, action, idenpotencyId, data);

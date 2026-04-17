@@ -11,10 +11,13 @@ using WebAppExam.InventoryService.Infrastructure.Constants;
 using WebAppExam.InventoryService.Domain.Exceptions;
 using StackExchange.Redis;
 using Confluent.Kafka;
+using System.Text.Json;
+using WebAppExam.GrpcContracts.Protos;
+using WebAppExam.InventoryService.Infrastructure.Common;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers.OrderCanceledConsumer;
 
-public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
+public class OrderCanceledConsumer : IMessageHandler<OutboxPointer>
 {
     private readonly IInventoryService _inventoryService;
     private readonly IOrderService _orderService;
@@ -22,6 +25,7 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
     private readonly IIdempotencyService _idempotencyService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<OrderCanceledConsumer> _logger;
+    private readonly OutboxGrpc.OutboxGrpcClient _outboxClient;
 
     public OrderCanceledConsumer(
         IInventoryService inventoryService,
@@ -29,7 +33,8 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
         ICacheLockService cacheLockService,
         IIdempotencyService idempotencyService,
         IUnitOfWork unitOfWork,
-        ILogger<OrderCanceledConsumer> logger)
+        ILogger<OrderCanceledConsumer> logger,
+        OutboxGrpc.OutboxGrpcClient outboxClient)
     {
         _inventoryService = inventoryService;
         _orderService = orderService;
@@ -37,89 +42,112 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
         _idempotencyService = idempotencyService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _outboxClient = outboxClient;
     }
 
-    public async Task Handle(IMessageContext context, OrderCanceledEvent message)
+    public async Task Handle(IMessageContext context, OutboxPointer pointer)
     {
-        var idempotencyId = message.IdempotencyId;
-        var lockToken = Guid.NewGuid().ToString();
-        var lockKey = $"{CacheKeys.IdempotencyLockPrefix}{idempotencyId}";
+        // var response = await _outboxClient.GetOutboxMessageAsync(new OutboxMessageRequest { Id = pointer.Id });
+        // var message = JsonSerializer.Deserialize<OrderCanceledEvent>(response.Content, new JsonSerializerOptions
+        // {
+        //     PropertyNameCaseInsensitive = true
+        // });
 
-        var acquiredLocks = await _cacheLockService.AcquireMultipleLocksAsync(
-            new[] { lockKey },
-            lockToken,
-            TimeSpan.FromSeconds(CommonConstants.LockTimeoutSeconds));
+        // if (message == null)
+        // {
+        //     _logger.LogError("Failed to deserialize OrderCanceledEvent for Outbox ID: {Id}", pointer.Id);
+        //     return;
+        // }
 
-        if (!acquiredLocks.Any())
-        {
-            _logger.LogWarning("Message {Id} is being processed by another worker.", idempotencyId);
-            return;
-        }
+        // var idempotencyId = message.IdempotencyId;
+        // var lockToken = Guid.NewGuid().ToString();
+        // var lockKey = $"{CacheKeys.IdempotencyLockPrefix}{idempotencyId}";
 
-        using var uow = _unitOfWork;
-        await _unitOfWork.StartTransactionAsync();
+        // var acquiredLocks = await _cacheLockService.AcquireMultipleLocksAsync(
+        //     new[] { lockKey },
+        //     lockToken,
+        //     TimeSpan.FromSeconds(CommonConstants.LockTimeoutSeconds));
 
-        try
-        {
-            var alreadyProcessed = await _idempotencyService.IsProcessedAsync($"{nameof(OrderCanceledConsumer)}:{idempotencyId}");
-            if (alreadyProcessed)
-            {
-                _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
-                await _unitOfWork.RollbackAsync();
-                return;
-            }
+        // if (!acquiredLocks.Any())
+        // {
+        //     _logger.LogWarning("Message {Id} is being processed by another worker.", idempotencyId);
+        //     return;
+        // }
 
-            if (message.Items != null && message.Items.Any())
-            {
-                var input = message.Items.Select(x => new OrderItemDTO
-                {
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    WareHouseId = x.WareHouseId
-                }).ToList();
+        // await _unitOfWork.StartTransactionAsync();
 
-                var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(input);
+        // try
+        // {
+        //     var alreadyProcessed = await _idempotencyService.IsProcessedAsync($"{nameof(OrderCanceledConsumer)}:{idempotencyId}");
+        //     if (alreadyProcessed)
+        //     {
+        //         _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
+        //         await _unitOfWork.RollbackAsync();
+                
+        //         // Feedback: Idempotency hit is treated as success
+        //         await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 3 });
+        //         return;
+        //     }
 
-                if (stockResult.IsSuccess)
-                {
-                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCanceledConsumer)}:{idempotencyId}");
-                    await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
-                    await _unitOfWork.CommitAsync();
-                }
-                else
-                {
-                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCanceledConsumer)}:{idempotencyId}");
-                    await SendMessageReply(message, false, stockResult.FailReason, input);
-                    await _unitOfWork.CommitAsync();
-                }
-            }
-            else
-            {
-                 await _unitOfWork.RollbackAsync();
-            }
-        }
-        catch (Exception ex) when (ex is RedisException || ex is RedisTimeoutException || ex is RedisConnectionException)
-        {
-            await RollbackAndThrow(ex, "Redis error during inventory processing", idempotencyId, message.OrderId);
-        }
-        catch (MongoException ex)
-        {
-            await RollbackAndThrow(ex, "MongoDB error during inventory processing", idempotencyId, message.OrderId);
-        }
-        catch (KafkaException ex)
-        {
-            await RollbackAndThrow(ex, "Kafka error during inventory processing", idempotencyId, message.OrderId);
-        }
-        catch (Exception ex)
-        {
-            try { await _unitOfWork.RollbackAsync(); } catch { }
-            _logger.LogError(ex, "[Error] - Inventory Handler: OrderId {OrderId}, IdempotencyId {Id}", message.OrderId, idempotencyId);
-            throw;
-        }
-        finally
-        {
-            await _cacheLockService.ReleaseMultipleLocksAsync(acquiredLocks, lockToken);
-        }
+        //     if (message.Items != null && message.Items.Any())
+        //     {
+        //         var input = message.Items.Select(x => new OrderItemDTO
+        //         {
+        //             ProductId = x.ProductId,
+        //             Quantity = x.Quantity,
+        //             WareHouseId = x.WareHouseId
+        //         }).ToList();
+
+        //         var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(input);
+
+        //         if (stockResult.IsSuccess)
+        //         {
+        //             await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCanceledConsumer)}:{idempotencyId}");
+        //             await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
+        //             await _unitOfWork.CommitAsync();
+        //         }
+        //         else
+        //         {
+        //             await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCanceledConsumer)}:{idempotencyId}");
+        //             await SendMessageReply(message, false, stockResult.FailReason, input);
+        //             await _unitOfWork.CommitAsync();
+        //         }
+
+        //         // Feedback: Success
+        //         await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 3 });
+        //     }
+        //     else
+        //     {
+        //          await _unitOfWork.RollbackAsync();
+        //     }
+        // }
+        // catch (Exception ex) when (ex is RedisException || ex is RedisTimeoutException || ex is RedisConnectionException)
+        // {
+        //     await RollbackAndThrow(ex, "Redis error during inventory processing", idempotencyId, message.OrderId);
+        // }
+        // catch (MongoException ex)
+        // {
+        //     await RollbackAndThrow(ex, "MongoDB error during inventory processing", idempotencyId, message.OrderId);
+        // }
+        // catch (KafkaException ex)
+        // {
+        //     await RollbackAndThrow(ex, "Kafka error during inventory processing", idempotencyId, message.OrderId);
+        // }
+        // catch (Exception ex)
+        // {
+        //     try { await _unitOfWork.RollbackAsync(); } catch { }
+        //     _logger.LogError(ex, "[Error] - Inventory Handler: OrderId {OrderId}, IdempotencyId {Id}", message.OrderId, idempotencyId);
+            
+        //     // Feedback: Failure
+        //     await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 2, Error = ex.Message });
+            
+        //     throw;
+        // }
+        // finally
+        // {
+        //     await _cacheLockService.ReleaseMultipleLocksAsync(acquiredLocks, lockToken);
+        // }
+        await Task.CompletedTask;
     }
 
     private async Task RollbackAndThrow(Exception ex, string customMessage, string idempotencyId, string orderId)
@@ -129,12 +157,12 @@ public class OrderCanceledConsumer : IMessageHandler<OrderCanceledEvent>
         throw new DatabaseOperationException(customMessage, ex);
     }
 
-    private async Task SendMessageReply(OrderCanceledEvent message, bool isSuccess, string reason, List<OrderItemDTO> input)
+    private async Task SendMessageReply(OrderCanceledEvent message, bool isSuccess, string reason, OrderItemDTO input)
     {
         var orderReply = OrderReplyDTO.FromResult(
                message.OrderId,
                isSuccess ? message.Status : OrderStatus.Failed,
-               reason, MessageConstants.ReplyCanceledType, [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
+               reason, MessageConstants.ReplyCanceledType, OrderDetailDTO.FromResult(input.ProductId, input.Quantity, 0, input.WareHouseId));
 
         await _orderService.SendMessageReply(orderReply, isSuccess, reason);
     }

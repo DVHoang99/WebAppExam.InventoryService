@@ -15,6 +15,8 @@ using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using WebAppExam.GrpcContracts.Protos;
+using WebAppExam.InventoryService.Infrastructure.Common;
 
 namespace WebAppExam.InventoryService.Infrastructure;
 
@@ -90,6 +92,13 @@ public static class DependencyInjection
         services.AddScoped<IIdempotencyService, RedisIdempotencyService>();
         services.AddScoped<IInventoryService, Services.InventoryService>();
         services.AddScoped<IOrderService, OrderService>();
+        
+        // Register gRPC Client
+        services.AddSingleton<InternalApiKeyInterceptor>();
+        services.AddGrpcClient<OutboxGrpc.OutboxGrpcClient>(o =>
+        {
+            o.Address = new Uri(configuration["OrderService:GrpcUrl"] ?? "http://localhost:5003");
+        }).AddInterceptor<InternalApiKeyInterceptor>();
 
         return services;
     }

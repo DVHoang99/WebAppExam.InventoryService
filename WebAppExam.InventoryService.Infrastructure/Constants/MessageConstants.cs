@@ -8,6 +8,7 @@ public static class MessageConstants
     public const string OrderUpdatedType = "OrderUpdated";
     public const string OrderDeletedType = "OrderDeleted";
     public const string OrderCanceledType = "OrderCanceled";
+    public const string OutboxPointerType = "OutboxPointer";
 
     public const string ReplyCreatedType = "created";
     public const string ReplyUpdatedType = "updated";

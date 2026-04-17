@@ -36,8 +36,10 @@ public class MongoUnitOfWork : IUnitOfWork
 
     public async Task<bool> CommitAsync(CancellationToken cancellationToken = default)
     {
+        if (_disposed) return false;
+
         var session = _sessionProvider.CurrentSession;
-        if (session != null && session.IsInTransaction)
+        if (session != null && !IsDisposed(session) && session.IsInTransaction)
         {
             await session.CommitTransactionAsync(cancellationToken);
             return true;
@@ -47,10 +49,32 @@ public class MongoUnitOfWork : IUnitOfWork
 
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
+        if (_disposed) return;
+
         var session = _sessionProvider.CurrentSession;
-        if (session != null && session.IsInTransaction)
+        try
         {
-            await session.AbortTransactionAsync(cancellationToken);
+            if (session != null && !IsDisposed(session) && session.IsInTransaction)
+            {
+                await session.AbortTransactionAsync(cancellationToken);
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // Already disposed, ignore
+        }
+    }
+
+    private static bool IsDisposed(IClientSessionHandle session)
+    {
+        try
+        {
+            _ = session.IsInTransaction;
+            return false;
+        }
+        catch (ObjectDisposedException)
+        {
+            return true;
         }
     }
 

@@ -11,10 +11,13 @@ using WebAppExam.InventoryService.Infrastructure.Constants;
 using WebAppExam.InventoryService.Domain.Exceptions;
 using StackExchange.Redis;
 using Confluent.Kafka;
+using System.Text.Json;
+using WebAppExam.GrpcContracts.Protos;
+using WebAppExam.InventoryService.Infrastructure.Common;
 
 namespace WebAppExam.InventoryService.Infrastructure.Consumers;
 
-public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
+public class OrderCreatedConsumer : IMessageHandler<OutboxPointer>
 {
     private readonly IInventoryService _inventoryService;
     private readonly IOrderService _orderService;
@@ -22,6 +25,7 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
     private readonly IIdempotencyService _idempotencyService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<OrderCreatedConsumer> _logger;
+    private readonly OutboxGrpc.OutboxGrpcClient _outboxClient;
 
     public OrderCreatedConsumer(
         IInventoryService inventoryService,
@@ -29,7 +33,8 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
         ICacheLockService cacheLockService,
         IIdempotencyService idempotencyService,
         IUnitOfWork unitOfWork,
-        ILogger<OrderCreatedConsumer> logger)
+        ILogger<OrderCreatedConsumer> logger,
+        OutboxGrpc.OutboxGrpcClient outboxClient)
     {
         _inventoryService = inventoryService;
         _orderService = orderService;
@@ -37,10 +42,23 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
         _idempotencyService = idempotencyService;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _outboxClient = outboxClient;
     }
 
-    public async Task Handle(IMessageContext context, OrderCreatedEvent message)
+    public async Task Handle(IMessageContext context, OutboxPointer pointer)
     {
+        var response = await _outboxClient.GetOutboxMessageAsync(new OutboxMessageRequest { Id = pointer.Id });
+        var message = JsonSerializer.Deserialize<OrderCreatedEvent>(response.Content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (message == null)
+        {
+            _logger.LogError("Failed to deserialize OrderCreatedEvent for Outbox ID: {Id}", pointer.Id);
+            return;
+        }
+
         var idempotencyId = message.IdempotencyId;
         var lockToken = Guid.NewGuid().ToString();
         var lockKey = $"{CacheKeys.IdempotencyLockPrefix}{idempotencyId}";
@@ -56,47 +74,54 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
             return;
         }
 
-        using var uow = _unitOfWork;
         await _unitOfWork.StartTransactionAsync();
 
         try
         {
-            var alreadyProcessed = await _idempotencyService.IsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
-            if (alreadyProcessed)
-            {
-                _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
-                await _unitOfWork.RollbackAsync();
-                return;
-            }
+            // var alreadyProcessed = await _idempotencyService.IsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
+            // if (alreadyProcessed)
+            // {
+            //     _logger.LogInformation("Message {Id} has been successfully processed before.", idempotencyId);
+            //     await _unitOfWork.RollbackAsync();
 
-            if (message.Items != null && message.Items.Any())
-            {
-                var input = message.Items.Select(x => new OrderItemDTO
-                {
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    WareHouseId = x.WareHouseId
-                }).ToList();
+            //     // Feedback: Idempotency hit is treated as success
+            //     await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 3 });
+            //     return;
+            // }
 
-                var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(input);
+            // if (message.Items != null && message.Items.Any())
+            // {
+            //     var input = message.Items.Select(x => new OrderItemDTO
+            //     {
+            //         ProductId = x.ProductId,
+            //         Quantity = x.Quantity,
+            //         WareHouseId = x.WareHouseId
+            //     }).ToList();
 
-                if (stockResult.IsSuccess)
-                {
-                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
-                    await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
-                    await _unitOfWork.CommitAsync();
-                }
-                else
-                {
-                    await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
-                    await SendMessageReply(message, false, stockResult.FailReason, input);
-                    await _unitOfWork.CommitAsync();
-                }
-            }
-            else
-            {
-                 await _unitOfWork.RollbackAsync();
-            }
+            //     var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(input);
+
+            //     if (stockResult.IsSuccess)
+            //     {
+            //         await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
+            //         await SendMessageReply(message, stockResult.IsSuccess, stockResult.FailReason, input);
+            //         await _unitOfWork.CommitAsync();
+            //     }
+            //     else
+            //     {
+            //         await _idempotencyService.MarkAsProcessedAsync($"{nameof(OrderCreatedConsumer)}:{idempotencyId}");
+            //         await SendMessageReply(message, false, stockResult.FailReason, input);
+            //         await _unitOfWork.CommitAsync();
+            //     }
+
+            //     // Feedback: Success
+            //     await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 3 });
+            // }
+            // else
+            // {
+            //      await _unitOfWork.RollbackAsync();
+            // }
+
+            await Task.CompletedTask;
         }
         catch (Exception ex) when (ex is RedisException || ex is RedisTimeoutException || ex is RedisConnectionException)
         {
@@ -114,6 +139,10 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
         {
             await _unitOfWork.RollbackAsync();
             _logger.LogError(ex, "[Error] - Inventory Handler: OrderId {OrderId}, IdempotencyId {Id}", message.OrderId, idempotencyId);
+
+            // Feedback: Failure
+            await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 2, Error = ex.Message });
+
             throw;
         }
         finally
@@ -129,12 +158,12 @@ public class OrderCreatedConsumer : IMessageHandler<OrderCreatedEvent>
         throw new DatabaseOperationException(customMessage, ex);
     }
 
-    private async Task SendMessageReply(OrderCreatedEvent message, bool isSuccess, string reason, List<OrderItemDTO> input)
+    private async Task SendMessageReply(OrderCreatedEvent message, bool isSuccess, string reason, OrderItemDTO input)
     {
         var orderReply = OrderReplyDTO.FromResult(
                message.OrderId,
                isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
-               reason, MessageConstants.ReplyCreatedType, [.. input.Select(x => OrderDetailDTO.FromResult(x.ProductId, x.Quantity, 0, x.WareHouseId))]);
+               reason, MessageConstants.ReplyCreatedType, OrderDetailDTO.FromResult(input.ProductId, input.Quantity, 0, input.WareHouseId));
 
         await _orderService.SendMessageReply(orderReply, isSuccess, reason);
     }
