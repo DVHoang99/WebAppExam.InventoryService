@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using KafkaFlow;
 using Microsoft.Extensions.Logging;
 using WebAppExam.GrpcContracts.Protos;
@@ -98,7 +94,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
                 };
 
                 var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(item);
-                await SendMessageReply(message.OrderId, stockResult.IsSuccess, stockResult.FailReason, item);
+                await SendMessageReply(message.OrderId, stockResult.IsSuccess, stockResult.FailReason, item, pointer.Type);
                 await _unitOfWork.CommitAsync();
 
                 await _idempotencyService.MarkAsProcessedAsync($"{nameof(CalculateInventoryConsumer)}:{idempotencyId}");
@@ -111,25 +107,15 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
             }
         }
 
-        private async Task SendMessageReply(string orderId, bool isSuccess, string reason, OrderItemDTO input)
+        private async Task SendMessageReply(string orderId, bool isSuccess, string reason, OrderItemDTO input, string replyType)
         {
             var orderReply = OrderReplyDTO.FromResult(
                    orderId,
                    isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
-                   reason, MessageConstants.ReplyCreatedType, OrderDetailDTO.FromResult(input.ProductId, input.Quantity, 0, input.WareHouseId));
+                   reason, replyType, OrderDetailDTO.FromResult(input.ProductId, input.Quantity, 0, input.WareHouseId));
 
             await _orderService.SendMessageReply(orderReply, isSuccess, reason);
         }
-
-        // private async Task Update()
-        // {
-
-        // }
-
-        // private async Task Delete()
-        // {
-
-        // }
 
         // private async Task RollbackAndThrow(Exception ex, string customMessage, string idempotencyId, string orderId)
         // {

@@ -12,7 +12,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Repositories;
 
 public class InventoryRepository : BaseRepository<Inventory>, IInventoryRepository
 {
-    public InventoryRepository(IMongoDatabase database, IMongoSessionProvider sessionProvider) 
+    public InventoryRepository(IMongoDatabase database, IMongoSessionProvider sessionProvider)
         : base(database, "Inventories", sessionProvider)
     {
     }
@@ -31,7 +31,7 @@ public class InventoryRepository : BaseRepository<Inventory>, IInventoryReposito
         var filter = Builders<Inventory>.Filter.Eq(x => x.CorrelationId, correlationId)
            & Builders<Inventory>.Filter.Eq(x => x.ProductId, productId)
            & Builders<Inventory>.Filter.Eq(x => x.WareHouseId, warehouseId);
-        
+
         var session = _sessionProvider.CurrentSession;
         if (session != null)
             return await _collection.Find(session, filter).FirstOrDefaultAsync(cancellationToken);
@@ -49,8 +49,10 @@ public class InventoryRepository : BaseRepository<Inventory>, IInventoryReposito
 
     public async Task<Inventory> GetInventoryByProductIdAndWarehouseIdAsync(string productId, string warehouseId, CancellationToken cancellationToken = default)
     {
-        var filter = Builders<Inventory>.Filter.Eq(x => x.ProductId, productId) & Builders<Inventory>.Filter.Eq(x => x.WareHouseId, warehouseId);
-        
+        var filter = Builders<Inventory>.Filter
+        .Eq(x => x.ProductId, productId) &
+        Builders<Inventory>.Filter.Eq(x => x.WareHouseId, warehouseId);
+
         var session = _sessionProvider.CurrentSession;
         if (session != null)
             return await _collection.Find(session, filter).FirstOrDefaultAsync(cancellationToken);
@@ -158,7 +160,7 @@ public class InventoryRepository : BaseRepository<Inventory>, IInventoryReposito
         var session = _sessionProvider.CurrentSession;
         if (session != null)
             return await _collection.Find(session, filter).ToListAsync(cancellationToken);
-        
+
         return await _collection.Find(filter).ToListAsync(cancellationToken);
     }
 }

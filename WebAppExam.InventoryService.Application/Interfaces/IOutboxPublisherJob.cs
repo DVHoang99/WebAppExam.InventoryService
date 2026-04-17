@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 
 namespace WebAppExam.InventoryService.Application.Interfaces;
 
