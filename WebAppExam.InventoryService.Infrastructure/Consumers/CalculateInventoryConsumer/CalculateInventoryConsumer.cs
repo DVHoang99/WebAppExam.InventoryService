@@ -4,9 +4,7 @@ using Microsoft.Extensions.Logging;
 using WebAppExam.GrpcContracts.Protos;
 using WebAppExam.InventoryService.Application.Interfaces;
 using WebAppExam.InventoryService.Application.Inventories.DTOs;
-using WebAppExam.InventoryService.Application.Orders.DTOs;
 using WebAppExam.InventoryService.Application.Orders.Services;
-using WebAppExam.InventoryService.Domain.Enum;
 using WebAppExam.InventoryService.Infrastructure.Common;
 using WebAppExam.InventoryService.Infrastructure.Constants;
 
@@ -20,7 +18,6 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
         private readonly IUnitOfWork _unitOfWork;
         private readonly IIdempotencyService _idempotencyService;
         private readonly IInventoryService _inventoryService;
-        private readonly IOrderService _orderService;
 
         public CalculateInventoryConsumer(
             ILogger<CalculateInventoryConsumer> logger,
@@ -28,8 +25,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
             ICacheLockService cacheLockService,
             IUnitOfWork unitOfWork,
             IIdempotencyService idempotencyService,
-            IInventoryService inventoryService,
-            IOrderService orderService)
+            IInventoryService inventoryService)
         {
             _logger = logger;
             _outboxClient = outboxClient;
@@ -37,7 +33,6 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
             _unitOfWork = unitOfWork;
             _idempotencyService = idempotencyService;
             _inventoryService = inventoryService;
-            _orderService = orderService;
         }
 
         public async Task Handle(IMessageContext context, OutboxPointer pointer)
@@ -120,22 +115,14 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
             }
         }
 
-        private async Task SendMessageReply(string orderId, bool isSuccess, string reason, OrderItemDTO input, string replyType)
-        {
-            var orderReply = OrderReplyDTO.FromResult(
-                   orderId,
-                   isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
-                   reason, replyType, OrderDetailDTO.FromResult(input.ProductId, input.Quantity, 0, input.WareHouseId));
-
-            await _orderService.SendMessageReply(orderReply, isSuccess, reason);
-        }
-
-        // private async Task RollbackAndThrow(Exception ex, string customMessage, string idempotencyId, string orderId)
+        // private async Task SendMessageReply(string orderId, bool isSuccess, string reason, OrderItemDTO input, string replyType)
         // {
-        //     _logger.LogError(ex, customMessage + " OrderId: {OrderId}", orderId);
-        //     await _unitOfWork.RollbackAsync();
-        //     await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = orderId, Status = 2 });
-        //     throw new Exception(customMessage);
+        //     var orderReply = OrderReplyDTO.FromResult(
+        //            orderId,
+        //            isSuccess ? OrderStatus.Pending : OrderStatus.Failed,
+        //            reason, replyType, OrderDetailDTO.FromResult(input.ProductId, input.Quantity, 0, input.WareHouseId));
+
+        //     await _orderService.SendMessageReply(orderReply, isSuccess, reason);
         // }
     }
 
