@@ -22,7 +22,6 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
         private readonly IInventoryService _inventoryService;
         private readonly IOrderService _orderService;
 
-
         public CalculateInventoryConsumer(
             ILogger<CalculateInventoryConsumer> logger,
             OutboxGrpc.OutboxGrpcClient outboxClient,
@@ -43,7 +42,6 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
 
         public async Task Handle(IMessageContext context, OutboxPointer pointer)
         {
-
             var response = await _outboxClient.GetOutboxMessageAsync(new OutboxMessageRequest { Id = pointer.Id });
             var message = JsonSerializer.Deserialize<OutBoxMessageDTO>(response.Content, new JsonSerializerOptions
             {
@@ -61,7 +59,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
             var lockKey = $"{CacheKeys.IdempotencyLockPrefix}{idempotencyId}";
 
             var acquiredLocks = await _cacheLockService.AcquireMultipleLocksAsync(
-           new[] { lockKey },
+           [lockKey],
            lockToken,
            TimeSpan.FromSeconds(CommonConstants.LockTimeoutSeconds));
 
@@ -82,6 +80,7 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
                     await _unitOfWork.RollbackAsync();
 
                     // Feedback: Idempotency hit is treated as success
+                    // status 3: Processed successfully (idempotency hit)
                     await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 3 });
                     return;
                 }
@@ -93,16 +92,30 @@ namespace WebAppExam.InventoryService.Infrastructure.Consumers.CalculateInventor
                     WareHouseId = message.WareHouseId
                 };
 
-                var stockResult = await _inventoryService.CheckAndDeductInventoryAsync(item);
-                await SendMessageReply(message.OrderId, stockResult.IsSuccess, stockResult.FailReason, item, pointer.Type);
-                await _unitOfWork.CommitAsync();
+                var (isSuccess, failReason) = await _inventoryService.CheckAndDeductInventoryAsync(item);
+                //await SendMessageReply(message.OrderId, isSuccess, failReason, item, pointer.Type);
+                if (!isSuccess)
+                {
+                    // Feedback: Failure
+                    // status 2: Failed to process
+                    await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 2 });
+                    _logger.LogError($"Inventory check failed for OrderId: {message.OrderId}, ProductId: {message.ProductId}. Reason: {failReason}");
+                    await _unitOfWork.RollbackAsync();
+                }
 
                 await _idempotencyService.MarkAsProcessedAsync($"{nameof(CalculateInventoryConsumer)}:{idempotencyId}");
+                await _unitOfWork.CommitAsync();
+                return;
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while processing message {Id}", idempotencyId);
+
                 await _unitOfWork.RollbackAsync();
+
+                // Feedback: Failure
+                // status 2: Failed to process
                 await _outboxClient.UpdateOutboxStatusAsync(new UpdateStatusRequest { Id = pointer.Id, Status = 2 });
             }
         }
